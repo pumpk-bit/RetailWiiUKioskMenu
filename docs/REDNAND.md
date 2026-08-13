@@ -2,6 +2,8 @@
 
 Licenses on the **SD** (redSLC). Kiosk Menu on **sys MLC** (Hybrid) or **red MLC** (Full). **Keep the SD in** while Kiosk Menu runs.
 
+Note: You cannot fully use Kiosk Menu since it requires the user to remove the SD card to leave Kiosk Settings. Use SysNAND if you want full Kiosk Menu.
+
 **SysNAND / removable SD?** → [SYSNAND.md](SYSNAND.md)
 
 ---
