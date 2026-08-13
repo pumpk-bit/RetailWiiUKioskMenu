@@ -100,3 +100,7 @@ Kiosk NAND/title data is copyrighted. You obtain dumps yourself.
 - [wiiu-nandextract](https://github.com/koolkdev/wiiu-nandextract) · [wfs-tools](https://github.com/koolkdev/wfs-tools)
 
 Thanks: [koolkdev](https://github.com/koolkdev), ISFShax / minute community.
+
+## AI usage
+
+Thanks to Cursor AI for helping me with this project. (cursoragent@cursor.com / https://cursor.com/ )
