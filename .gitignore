@@ -1,0 +1,20 @@
+# Local config (copy from config.example.ps1)
+config/config.ps1
+
+# User dumps and built images — never commit
+stripped/
+backup/
+dumps/
+overlay/mutant/**
+!overlay/mutant/.gitkeep
+*.bin
+*.RAW
+*.raw
+*.tik
+cert.sys
+title.list
+
+# Logs
+logs/
+scripts/**/*.log
+*.log
