@@ -88,18 +88,13 @@ If the ticket already exists in your **kiosk SLC extract**, a normal mutant buil
 
 When a ticket is **missing from mutant** or was **skipped** on live (same path as retail — see [launch-ticket bug](#cannot-launch-this-title-sct-or-kiosk-menu)):
 
-**1. Find the ticket file** in your kiosk extract — search for the title ID hex inside `.tik` files:
+**1. Find the ticket file** in your kiosk extract — search for the title ID hex inside `.tik` files, or run:
 
 ```powershell
-$kioskTik = 'C:\path\to\kiosk\slc\sys\rights\ticket'
-$tid = '000500021017BD00'   # example: Mario Kart 8 demo
-Get-ChildItem $kioskTik -Recurse -Filter *.tik | ForEach-Object {
-    $hex = ([BitConverter]::ToString([IO.File]::ReadAllBytes($_.FullName))).Replace('-','')
-    if ($hex -match $tid) {
-        $_.FullName.Substring($kioskTik.Length).TrimStart('\') -replace '\\','/'
-    }
-}
+.\scripts\map_kiosk_demo_tickets.ps1
 ```
+
+That writes `backup\live_slc_pre_mutant\kiosk_demo_ticket_map.txt` (tab-separated: demo folder, full title ID, stub/playable, SLC ticket path). Override paths with `-KioskSlcExtract`, `-DemoMlcRoot`, `-OutputPath`.
 
 **2. Copy into mutant** (keep the same relative path):
 
@@ -145,6 +140,7 @@ If `plan_additive_tickets.ps1` lists a ticket under **skipped** (already on live
 | `strip_from_config.ps1` / `validate_slc_dump.ps1` / `flash_stripped_partition.ps1` | redNAND SD prepare |
 | `build_mutant_slc.ps1` | Merge retail + kiosk licenses on PC (builds system.xml; `-FullKioskPolicy` for eco/prefs) |
 | `backup_slc_ftp.ps1` / `plan_additive_tickets.ps1` / `apply_mutant_slc_ftp.ps1` | Live SLC patch (system.xml prompt default **N**; `-ApplySystemXml` to upload) |
+| `map_kiosk_demo_tickets.ps1` | Map MLC `00050002` demo folders → SLC `.tik` paths (PC only) |
 | `install_rednand_ini.ps1` | Install or remove `rednand.ini` from mode |
 | `upload_sys_title_mlc.ps1` | Kiosk Menu + native SCT → MLC |
 | `make_home_menu_default.ps1` / `make_kiosk_menu_default.ps1` | Coldboot swap **only while Home/FTP still works**; kiosk default trap needs reflash |
