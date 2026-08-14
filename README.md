@@ -66,15 +66,45 @@ Or copy `config\config.example.ps1` → `config\config.ps1` and fill `FtpHost` +
 
 ## Adding tickets for more apps (demos, kiosk titles)
 
-Launching an extra title needs **three** things:
+Launching an extra title needs **three** things on the console:
 
-1. **Ticket** (`.tik`) on **SLC** under `sys/rights/ticket/…`
-2. **Title ID** listed in **`title.list`** (merged at build time)
-3. **Title files** on **MLC** (for games/demos) — separate from SLC patch
+| # | What | Where on console (FTP) |
+|---|------|-------------------------|
+| 1 | **Ticket** (`.tik`) | `storage_slc/sys/rights/ticket/…` |
+| 2 | **Title ID** in **`title.list`** | `storage_slc/sys/rights/sys/title.list` |
+| 3 | **Title files** (games/demos) | `storage_mlc/usr/title/0005000x/<titleid>/` |
 
-### Automatic (recommended)
+Scripts can upload SLC pieces for you; **MLC demo folders are always your job** (script or FTP). Any FTP client works — **WinSCP**, FileZilla, etc. Connect to the IP from `config.ps1` while **Home Menu** is up and FTPiiU is running. Paths are **`storage_slc`** and **`storage_mlc`** at the FTP root.
 
-If the ticket already exists in your **kiosk SLC extract**, a normal mutant build picks it up:
+### 1. Map demo folders → SLC ticket paths (PC)
+
+Before copying anything, generate a lookup table from your kiosk dump:
+
+```powershell
+.\scripts\map_kiosk_demo_tickets.ps1
+```
+
+Defaults: kiosk SLC from `KioskSlcExtract` in config, MLC demos at `<kiosk-dump-root>\Extracted\usr\title\00050002`, output `backup\live_slc_pre_mutant\kiosk_demo_ticket_map.txt`. Override with `-KioskSlcExtract`, `-DemoMlcRoot`, `-OutputPath`.
+
+The report is tab-separated:
+
+| Column | Meaning |
+|--------|---------|
+| folder | MLC folder name (starts with 8-char title ID) |
+| full_title_id | e.g. `000500021017BD00` |
+| kind | **`playable`** — launch this one · **`stub`** — show/video tile only (points at another title or shows a demo video instead of a game) |
+| ticket_rel | Path under `sys/rights/ticket/` on SLC |
+| product_code | From `meta/meta.xml` |
+
+Stubs (`…FF` IDs, `non_playable_demo.rpx`, `content/dummy.txt`, or `KioskMeta.xml` pointing at a sibling title) are for the kiosk video titles, not for playing games. Launch from Kiosk Menu or SCT using the **`playable`** title ID.
+
+If you're copying a **`playable`** demo that has a matching **stub** row in the map, copy **both** MLC folders and ensure **both** `.tik` files are on SLC (mutant bulk apply usually includes both). Kiosk Menu may misbehave if the stub is missing, even when the playable demo is present.
+
+Some titles are **playable-only** (no separate stub folder) — one MLC install with game data and kiosk video content (e.g. New Super Mario Bros. U).
+
+### 2. Tickets + `title.list` on SLC
+
+**Most demos already in your kiosk extract** — let the mutant build pick them up:
 
 ```powershell
 .\scripts\build_mutant_slc.ps1 -Rebuild
@@ -82,53 +112,62 @@ If the ticket already exists in your **kiosk SLC extract**, a normal mutant buil
 .\scripts\apply_mutant_slc_ftp.ps1
 ```
 
-`build_mutant_slc.ps1` copies **kiosk-only** ticket paths (skips paths retail already has) and **unions** `title.list`. Then upload the title content to MLC yourself (FTP, WUP Installer GX, etc.).
+`build_mutant_slc.ps1` copies kiosk-only ticket paths (skips paths retail already has) and **unions** `title.list`.
 
-### Manual: one ticket from the kiosk dump
+**One ticket missing from mutant, or skipped on live** (same path as retail — see [launch-ticket bug](#cannot-launch-this-title-sct-or-kiosk-menu)):
 
-When a ticket is **missing from mutant** or was **skipped** on live (same path as retail — see [launch-ticket bug](#cannot-launch-this-title-sct-or-kiosk-menu)):
+1. From the map (or a hex search in your kiosk `.tik` files), note `ticket_rel` for each row you need — playable, and stub too when the map lists a pair (e.g. `1017bd00` + `1017bdff` → two tickets).
+2. Copy that file from your kiosk SLC extract into mutant, **keeping the same path**:
 
-**1. Find the ticket file** in your kiosk extract — search for the title ID hex inside `.tik` files, or run:
+   ```text
+   overlay\mutant\slc\sys\rights\ticket\<ticket_rel>
+   ```
 
-```powershell
-.\scripts\map_kiosk_demo_tickets.ps1
-```
+3. Re-merge lists: `.\scripts\build_mutant_slc.ps1 -Rebuild` (or confirm the title ID hex is already in mutant `title.list`).
+4. Upload — scripts **or manual FTP**:
 
-That writes `backup\live_slc_pre_mutant\kiosk_demo_ticket_map.txt` (tab-separated: demo folder, full title ID, stub/playable, SLC ticket path). Override paths with `-KioskSlcExtract`, `-DemoMlcRoot`, `-OutputPath`.
+   ```powershell
+   .\scripts\plan_additive_tickets.ps1
+   .\scripts\apply_mutant_slc_ftp.ps1
+   ```
 
-**2. Copy into mutant** (keep the same relative path):
+   **WinSCP / FTP manually:** upload the `.tik` to `storage_slc/sys/rights/ticket/<ticket_rel>`. If you changed `title.list`, upload `overlay\mutant\slc\sys\rights\sys\title.list` → `storage_slc/sys/rights/sys/title.list`. Keep binary mode; preserve the nested folder layout under `ticket/`.
+
+### 3. Demo content on MLC
+
+On the **console**, demos live under **`storage_mlc/usr/title/00050002/<8-char-id>/`** — the folder name must be **only** the 8-character title ID hex (e.g. `1017bd00`), matching what the system expects. Extra text in the folder name can prevent the title from loading.
+
+On your **PC**, you can rename extract folders for your own notes (e.g. `1017bd00 - kart`). **Strip that suffix before FTP** — upload/rename to just `1017bd00` (and `1017bdff` for the stub when present). Source tree example:
 
 ```text
-overlay\mutant\slc\sys\rights\ticket\<path from step 1>
+Extracted\usr\title\00050002\1017bd00 - kart\     ← OK on PC
+storage_mlc/usr/title/00050002/1017bd00/          ← required on Wii U
 ```
 
-**3. Ensure `title.list` includes the ID** — easiest: `.\scripts\build_mutant_slc.ps1 -Rebuild` (re-unions retail + kiosk lists). Or confirm the hex ID is already in the merged mutant `title.list`.
+- **WinSCP / FTP:** upload the **playable** folder (renamed to the bare ID). If the map has a matching **stub** row, upload that folder too (e.g. `1017bdff`). Skip stub-only tiles you are not pairing with a playable demo.
+- **`upload_sys_title_mlc.ps1`** only uploads **sys** titles (`00050010` — Kiosk Menu / SCT). It does **not** install game demos.
 
-**4. Upload to console**
+After SLC + MLC are in place, reboot or return to Home, then launch from Kiosk Menu or SCT.
+
+### Same-path overwrite warning
+
+If `plan_additive_tickets.ps1` lists a ticket under **skipped** (already on live), apply will **not** replace it. **Force-upload** the kiosk `.tik` from mutant — via WinSCP or:
 
 ```powershell
-# Re-plan and apply, OR force-upload one file:
 . .\scripts\lib\RWKM.Config.ps1
 . .\scripts\lib\RWKM.Ftp.ps1
 $cfg = Import-RwkmConfig
 $cred = Get-RwkmFtpCredential -Config $cfg
 $base = Get-RwkmFtpBase -Config $cfg -Mount slc
-Invoke-RwkmFtpPut 'overlay\mutant\slc\sys\rights\sys\title.list' "$base/sys/rights/sys/title.list" $cred
 Invoke-RwkmFtpPut 'overlay\mutant\slc\sys\rights\ticket\apps\000b\0000001c.tik' "$base/sys/rights/ticket/apps/000b/0000001c.tik" $cred
 ```
 
-Use your real path from step 1 instead of the example Kart path.
-
-**5. Put the title on MLC** — demos live under `storage_mlc/usr/title/0005000x\<titleid>\` (not handled by `upload_sys_title_mlc.ps1`, which only uploads **sys** titles `00050010` Kiosk Menu / SCT).
-
-### Same-path overwrite warning
-
-If `plan_additive_tickets.ps1` lists a ticket under **skipped** (already on live), apply will **not** replace it. **Force-upload** the kiosk `.tik` from mutant (same as Kiosk Menu / SCT fix above).
+Use your real `ticket_rel` from the map instead of the Kart example.
 
 ### Region (PAL console, USA demo)
 
 - **Sys titles** (`1fa81000`, `1f700500`): same title ID and ticket **path** on EUR/USA kiosks; use tickets from **your** kiosk donor.
-- **Game demos** (e.g. USA `1017bd00`): often need the **USA** ticket from the USA kiosk dump **and** matching MLC content. PAL-only mutant builds may omit USA demo tickets — copy them manually from Cat-I USA. Cross-region may also need `set_sys_prod_region_ftp.ps1` (experimental; back up `sys_prod.xml` first).
+- **Game demos** (e.g. USA `1017bd00`): often need the **USA** ticket from the USA kiosk dump **and** matching MLC content. PAL-only mutant builds may omit USA demo tickets — copy them manually from Cat-I USA (map script + WinSCP). Cross-region may also need `set_sys_prod_region_ftp.ps1` (experimental; back up `sys_prod.xml` first).
 
 ---
 
