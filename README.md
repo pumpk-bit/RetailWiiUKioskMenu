@@ -2,7 +2,7 @@
 
 Tools to run **Kiosk Menu** on a retail Wii U. **No dumps or tickets** in this repo.
 
-**Risk:** bad writes can soft-brick. Back up SD + NAND first. **PAL** tested; **USA** in scripts; **JPN** not supported yet.
+**Risk:** bad writes can soft-brick. Back up SD + NAND first. **PAL** tested; **USA** in scripts; **JPN** not supported yet. We cannot guarantee the console will be 100% stable. Crashed/reboots may happen more  often.
 
 Pick **one** guide:
 
@@ -59,7 +59,7 @@ Or copy `config\config.example.ps1` → `config\config.ps1` and fill `FtpHost` +
 - Keep **Home Menu** as default boot. Kiosk Menu coldboot traps you: Home never loads, so **FTP plugins never start** — undo needs a **reflash** (SD on redNAND, minute restore on sysNAND)
 - **Back up all saves** before first kiosk launch (auto-user **Sarah** can displace a profile)
 - Mutant sets software identity **WIS-001** / **FW** — **do not** [WiiUIdent](https://github.com/GaryOderNichts/WiiUIdent) **Submit System Data** while that is active
-- Upload only **clean** MLC extracts (no 0-byte / `dummy.txt` / failed wfs titles). Broken **sys** titles are worse than broken games
+- Upload only **clean** MLC extracts (no 0-byte / failed wfs titles). Broken **sys** titles are worse than broken games
 - In SCT, avoid **Boot title** (bricked redSLC in testing)
 
 ---
