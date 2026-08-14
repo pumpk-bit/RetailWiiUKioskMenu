@@ -7,7 +7,8 @@ param(
     [string]$KioskExtract = '',
     [string]$OutputMutant = '',
     [switch]$Rebuild,
-    [switch]$Force
+    [switch]$Force,
+    [switch]$FullKioskPolicy
 )
 
 $ErrorActionPreference = 'Stop'
@@ -165,24 +166,10 @@ try {
         Log 'WARN: missing retail or kiosk sys_prod.xml - skipped identity patch'
     }
 
-    $patchFiles = @(
-        'sys\config\eco.xml',
-        'sys\proc\prefs\im_cfg.xml',
-        'sys\proc\prefs\caffeine.xml',
-        'sys\proc\prefs\nn.xml'
-    )
-    foreach ($rel in $patchFiles) {
-        $src = Join-Path $kiosk $rel
-        $dst = Join-Path $mutant $rel
-        if (-not (Test-Path -LiteralPath $src)) { continue }
-        if (Test-Path -LiteralPath $dst) { Copy-Item -LiteralPath $dst -Destination "$dst.retail.bak" -Force }
-        Copy-Item -LiteralPath $src -Destination $dst -Force
-        Log "patched: $rel"
-    }
-
     $retailSys = Join-Path $retail 'sys\config\system.xml'
     $kioskSys  = Join-Path $kiosk  'sys\config\system.xml'
     $outSys    = Join-Path $mutant 'sys\config\system.xml'
+
     Copy-Item -LiteralPath $outSys -Destination "$outSys.retail.bak" -Force -ErrorAction SilentlyContinue
 
     $rxText = [IO.File]::ReadAllText($retailSys)
@@ -229,7 +216,26 @@ try {
         )
     }
     [IO.File]::WriteAllText($outSys, $outSysText)
-    Log "system.xml: coldboot $homeTitle (retail menu), kiosk policy fields"
+    Log "system.xml: coldboot $homeTitle (retail menu), kiosk policy fields (apply script asks Y/N before FTP)"
+
+    if ($FullKioskPolicy) {
+        $patchFiles = @(
+            'sys\config\eco.xml',
+            'sys\proc\prefs\im_cfg.xml',
+            'sys\proc\prefs\caffeine.xml',
+            'sys\proc\prefs\nn.xml'
+        )
+        foreach ($rel in $patchFiles) {
+            $src = Join-Path $kiosk $rel
+            $dst = Join-Path $mutant $rel
+            if (-not (Test-Path -LiteralPath $src)) { continue }
+            if (Test-Path -LiteralPath $dst) { Copy-Item -LiteralPath $dst -Destination "$dst.retail.bak" -Force }
+            Copy-Item -LiteralPath $src -Destination $dst -Force
+            Log "patched: $rel"
+        }
+    } else {
+        Log 'prefs skipped: eco.xml, caffeine.xml, im_cfg.xml, nn.xml (use -FullKioskPolicy for kiosk prefs)'
+    }
 
     foreach ($variant in @('system.xml.kioskboot', 'system.xml.kioskmenu')) {
         $ks = Join-Path $kiosk "sys\config\$variant"

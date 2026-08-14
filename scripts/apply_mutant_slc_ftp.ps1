@@ -3,8 +3,9 @@
 # Process (why):
 # 1) Trust local mutant built from YOUR extracts (build_mutant_slc.ps1).
 # 2) Warn + Y/N for DeploymentMode and every live SLC write.
-# 3) Upload config/prefs/certs + only additive tickets (never delete retail tickets).
-# 4) Leave Home Menu as default boot unless the user explicitly opts into the trap.
+# 3) Upload certs/title.list/identity + only additive tickets (never delete retail tickets).
+#    system.xml is built but only uploaded if you answer Y (default N - could cause instability).
+#    eco/prefs need -FullKioskPolicy. Leave Home Menu as default boot unless user opts into trap.
 
 param(
     [string]$ConfigPath = '',
@@ -13,7 +14,9 @@ param(
     [string]$FtpHost = '',
     [int]$Port = 0,
     [switch]$Force,
-    [switch]$SkipBootPrompt
+    [switch]$SkipBootPrompt,
+    [switch]$ApplySystemXml,
+    [switch]$FullKioskPolicy
 )
 
 $ErrorActionPreference = 'Stop'
@@ -55,10 +58,17 @@ try {
         default { 'redSLC on SD (hybrid)' }
     }
 
-    Confirm-RwkmWiiUFtpWrite -Config $cfg -Mount slc -Force:$Force -Action 'Apply mutant SLC (certs, title.list, system.xml, prefs, additive tickets)' -Extra @"
+    $applyScope = if ($FullKioskPolicy) {
+        'certs, title.list, sys_prod, additive tickets + optional system.xml prompt + kiosk prefs'
+    } else {
+        'certs, title.list, sys_prod, additive tickets (+ optional system.xml prompt; default skip)'
+    }
+
+    Confirm-RwkmWiiUFtpWrite -Config $cfg -Mount slc -Force:$Force -Action "Apply mutant SLC ($applyScope)" -Extra @"
   Mutant:   $mutant
   Region:   $($cfg.Region)
   Storage:  $slcWhere
+  Scope:    $applyScope
   Tickets:  ~$ticketCount additive uploads
   Plan:     $(if (Test-Path -LiteralPath $planPath) { $planPath } else { '(none - will scan mutant tickets)' })
 
@@ -72,8 +82,33 @@ $(if ($mode -eq 'SysNand') { 'Confirm you booted WITHOUT rednand.ini so this is 
     Write-RwkmLog "Mutant: $mutant"
     Write-RwkmLog "Target: $base"
 
-    Write-RwkmLog '[1/3] config + prefs + rights index...'
-    Invoke-RwkmFtpPut "$mutant\sys\config\system.xml" "$base/sys/config/system.xml" $cred
+    Write-RwkmLog '[1/3] rights + identity...'
+
+    $uploadSystemXml = $false
+    if ($ApplySystemXml) {
+        $uploadSystemXml = $true
+        Write-RwkmLog '  -ApplySystemXml: uploading system.xml without prompt'
+    } elseif (-not $Force) {
+        $uploadSystemXml = Confirm-RwkmSystemXmlPolicy
+    } else {
+        Write-RwkmLog '  Skipping system.xml (default N; use -ApplySystemXml to upload with -Force)'
+    }
+
+    if ($uploadSystemXml) {
+        Invoke-RwkmFtpPut "$mutant\sys\config\system.xml" "$base/sys/config/system.xml" $cred
+    } else {
+        Write-RwkmLog '  Skipped system.xml (retail crash/standby policy preserved)'
+    }
+
+    if ($FullKioskPolicy) {
+        Write-RwkmLog '  -FullKioskPolicy: uploading eco.xml and kiosk prefs'
+        Invoke-RwkmFtpPut "$mutant\sys\config\eco.xml" "$base/sys/config/eco.xml" $cred
+        Invoke-RwkmFtpPut "$mutant\sys\proc\prefs\im_cfg.xml" "$base/sys/proc/prefs/im_cfg.xml" $cred
+        Invoke-RwkmFtpPut "$mutant\sys\proc\prefs\caffeine.xml" "$base/sys/proc/prefs/caffeine.xml" $cred
+        Invoke-RwkmFtpPut "$mutant\sys\proc\prefs\nn.xml" "$base/sys/proc/prefs/nn.xml" $cred
+    } else {
+        Write-RwkmLog '  Skipping eco.xml, caffeine/im_cfg/nn (use -FullKioskPolicy for kiosk prefs)'
+    }
     Invoke-RwkmFtpPutOptional "$mutant\sys\config\system.xml.kioskboot" "$base/sys/config/system.xml.kioskboot" $cred @(
         "$base/sys/config/kioskboot.xml"
     ) | Out-Null
@@ -81,10 +116,6 @@ $(if ($mode -eq 'SysNand') { 'Confirm you booted WITHOUT rednand.ini so this is 
         "$base/sys/config/kioskmenu.xml"
     ) | Out-Null
     Invoke-RwkmFtpPut "$mutant\sys\config\sys_prod.xml" "$base/sys/config/sys_prod.xml" $cred
-    Invoke-RwkmFtpPut "$mutant\sys\config\eco.xml" "$base/sys/config/eco.xml" $cred
-    Invoke-RwkmFtpPut "$mutant\sys\proc\prefs\im_cfg.xml" "$base/sys/proc/prefs/im_cfg.xml" $cred
-    Invoke-RwkmFtpPut "$mutant\sys\proc\prefs\caffeine.xml" "$base/sys/proc/prefs/caffeine.xml" $cred
-    Invoke-RwkmFtpPut "$mutant\sys\proc\prefs\nn.xml" "$base/sys/proc/prefs/nn.xml" $cred
     Invoke-RwkmFtpPut "$mutant\sys\rights\sys\cert.sys" "$base/sys/rights/sys/cert.sys" $cred
     Invoke-RwkmFtpPut "$mutant\sys\rights\sys\title.list" "$base/sys/rights/sys/title.list" $cred
 
@@ -113,8 +144,12 @@ $(if ($mode -eq 'SysNand') { 'Confirm you booted WITHOUT rednand.ini so this is 
     Write-RwkmLog '[3/3] verify...'
     Invoke-RwkmCurlFtp -CurlArgs @('-s', '--ftp-pasv', "$base/sys/rights/sys/", '--user', $cred) -FailContext 'FTP verify rights' | Out-Host
     Write-RwkmLog '----'
-    Invoke-RwkmCurlFtp -CurlArgs @('-s', '--ftp-pasv', "$base/sys/config/system.xml", '--user', $cred) -FailContext 'FTP verify system.xml' |
-        Select-String 'default_title_id|reset_on_crash'
+    if ($uploadSystemXml) {
+        Invoke-RwkmCurlFtp -CurlArgs @('-s', '--ftp-pasv', "$base/sys/config/system.xml", '--user', $cred) -FailContext 'FTP verify system.xml' |
+            Select-String 'default_title_id|reset_on_crash'
+    } else {
+        Write-RwkmLog '  system.xml not uploaded (retail policy on live SLC)'
+    }
     Write-RwkmLog '----'
     Invoke-RwkmCurlFtp -CurlArgs @('-s', '--ftp-pasv', "$base/sys/config/sys_prod.xml", '--user', $cred) -FailContext 'FTP verify sys_prod' |
         Select-String 'model_number|code_id'

@@ -55,7 +55,7 @@ Boot once from SD to confirm the console still starts.
 .\scripts\build_mutant_slc.ps1
 ```
 
-Output: `overlay\mutant\slc\` — merged certs/tickets, Home Menu coldboot, software identity **WIS-001** / **FW** (region/serial stay retail).
+Output: `overlay\mutant\slc\` — merged certs/tickets, **WIS-001** / **FW** identity (region/serial stay retail). Build includes merged `system.xml`; apply asks **Y/N** before uploading it (**default N**).
 
 ---
 
@@ -84,9 +84,13 @@ Wii U on, Home Menu up, FTP plugin running, same Wi‑Fi as PC. Each script asks
 .\scripts\apply_mutant_slc_ftp.ps1
 ```
 
+Default apply uploads **rights + identity** (cert, title.list, sys_prod, tickets). You are then asked **Y/N** to upload **system.xml** — **default N** (could cause instability; Kiosk Menu works without it). **`-ApplySystemXml`** uploads without asking. **`-FullKioskPolicy`** also uploads eco/prefs.
+
 When asked about Kiosk Menu as default boot → **N**. Once trapped, Home never loads → **FTP plugins never start**. Undo is **re-flash clean redSLC** on the SD (PC), not `make_home_menu_default.ps1`.
 
 Quick check: `cert.sys` under `storage_slc/sys/rights/sys/` should be ~6656 bytes.
+
+If SCT/Kiosk Menu say *Cannot launch this title* after apply, see [README — launch tickets](../README.md#cannot-launch-this-title-sct-or-kiosk-menu) (additive apply may skip kiosk tickets at retail paths).
 
 ---
 
@@ -102,6 +106,8 @@ Default: Kiosk Menu (`1fa81000`) + native SCT (`1f700500`). No native SCT in ext
 
 **Use:** Home → **SCT** → Kiosk Menu. Empty demo grid inside Kiosk Menu is normal without kiosk save/demo data. Your Home Menu library on sys MLC is unchanged (Hybrid) unless you delete titles.
 
+Launch failures: [README — Cannot launch](../README.md#cannot-launch-this-title-sct-or-kiosk-menu). Adding more demos: [Adding tickets](../README.md#adding-tickets-for-more-apps-demos-kiosk-titles).
+
 ---
 
 ## Recovery / mistakes
@@ -109,7 +115,8 @@ Default: Kiosk Menu (`1fa81000`) + native SCT (`1f700500`). No native SCT in ext
 | Problem | Fix |
 |---------|-----|
 | Bad redSLC | Fresh SLC.RAW → strip → validate → flash → re-apply mutant |
-| Stuck in Kiosk Menu | Re-flash clean redSLC on the SD — no Home Menu means no FTP plugins |
+| **Cannot launch SCT / Kiosk Menu** | [Launch-ticket skip bug](../README.md#cannot-launch-this-title-sct-or-kiosk-menu) — force-upload two tickets |
+| Stuck in Kiosk Menu | Re-flash clean redSLC on the SD — no Home Menu means no FTP plugins. Playable demos may allow **Home** to exit in some setups |
 | Pull SD while kiosk runs | Crash — licenses are on redSLC |
 | Undo kiosk | Clean retail redSLC flash; delete uploaded titles from MLC if you want |
 

@@ -194,3 +194,25 @@ function Confirm-RwkmKioskMenuDefault {
     param([switch]$Force)
     return Confirm-Rwkm -Level Critical -Prompt (Get-RwkmKioskMenuDefaultWarning) -Force:$Force
 }
+
+function Get-RwkmSystemXmlPolicyWarning {
+    return @(
+        'Upload mutant system.xml to live SLC?'
+        ''
+        'This merges kiosk policy into system.xml (standby, reset_on_crash, simulated_ppc_mem2_size).'
+        'Kiosk Menu rights work WITHOUT this file if you keep retail system.xml.'
+        ''
+        'WARNING - COULD CAUSE INSTABILITY:'
+        '  - reset_on_crash=1 reboots the console on crashes instead of showing an error.'
+        '  - simulated_ppc_mem2_size=1 can affect memory behavior.'
+        '  - Kiosk standby settings differ from retail.'
+        '  - Retail hardware testing showed random reboots after full kiosk policy apply.'
+        ''
+        'RECOMMENDED: answer N (default). Launch Kiosk Menu from Home -> SCT instead.'
+    ) -join "`n"
+}
+
+function Confirm-RwkmSystemXmlPolicy {
+    param([switch]$Force)
+    return Confirm-Rwkm -Level Warning -Prompt (Get-RwkmSystemXmlPolicyWarning) -Force:$Force
+}
