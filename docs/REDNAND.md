@@ -16,7 +16,7 @@ Licenses on the **SD** (redSLC). Kiosk Menu on **sys MLC** (Hybrid) or **red MLC
    - **FullRedNand:** **64 GB+** recommended (red SLC **and** red MLC on SD — size depends on your MLC dump)
 3. Retail + kiosk dumps extracted on PC:
    - **SLC** with [NAND Extractor](https://github.com/koolkdev/wiiu-nandextract) + **otp.bin** → `dumps\retail\` and `dumps\kiosk\` (see the text file in each folder)
-   - **Kiosk MLC** with [wfs-extract](https://github.com/koolkdev/wfs-tools): `wfs-extract --input mlc.bin --otp otp.bin --dump-path Extracted` inside `dumps\kiosk`, **or** set `KioskMlcSysTitleRoot` to your extract
+   - **Kiosk MLC** with [wfs-extract](https://github.com/koolkdev/wfs-tools): `--dump-path Extracted` inside `dumps\kiosk`, **or** set `KioskMlcSysTitleRoot` to your extract
 4. `.\scripts\setup_config.ps1` — Region, **your** Wii U IP, **your** SD drive letter (from This PC — the volume with `\minute\`). Scripts resolve the disk number from that letter; they never guess `E:` or auto-pick a USB stick.
 5. Set **`DeploymentMode`** in config:
    - **`Hybrid`** (default) — redSLC on SD + **sys** MLC (your games stay on console)

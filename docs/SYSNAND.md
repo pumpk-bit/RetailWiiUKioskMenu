@@ -11,7 +11,7 @@ Mutant licenses + Kiosk Menu on the **console’s own SLC and MLC**. After apply
 1. ISFShax + minute; **full minute SLC (+ SLCCMPT) backup** of sysNAND stored offline
 2. Retail + kiosk dumps extracted:
    - **SLC** with [NAND Extractor](https://github.com/koolkdev/wiiu-nandextract) + **otp.bin** → `dumps\retail\` and `dumps\kiosk\`
-   - **Kiosk MLC** with [wfs-extract](https://github.com/koolkdev/wfs-tools) (`wfs-extract --input mlc.bin --otp otp.bin --dump-path Extracted`) into `dumps\kiosk\Extracted`, or set `KioskMlcSysTitleRoot`. Only **clean** title folders.
+   - **Kiosk MLC** with [wfs-extract](https://github.com/koolkdev/wfs-tools) (`--dump-path Extracted`) into `dumps\kiosk\Extracted`, or set `KioskMlcSysTitleRoot`. Only **clean** title folders.
 3. `.\scripts\setup_config.ps1` — Region, **your** Wii U IP, SD letter if you still use the card for minute/`rednand.ini`, extract paths
 4. Set **`DeploymentMode = 'SysNand'`**
 5. **Back up all user saves** (kiosk may create user **Sarah**)

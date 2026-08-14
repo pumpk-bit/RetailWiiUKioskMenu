@@ -20,8 +20,6 @@ Kiosk MLC (Kiosk Menu, native SCT, demos) is SEPARATE. Two options:
 
   A) Extract here (default the scripts look for):
 
-       wfs-extract --input mlc.bin --otp otp.bin --dump-path Extracted
-
      Use the kiosk mlc.bin + that dump's otp.bin.
      https://github.com/koolkdev/wfs-tools
 
@@ -36,5 +34,5 @@ Kiosk MLC (Kiosk Menu, native SCT, demos) is SEPARATE. Two options:
          <your-extract>\sys\title\00050010
        - or copy/move that Extracted tree into this folder as Extracted\
 
-Do not commit dumps. USA vs PAL: use the kiosk dump that matches your plan
+USA vs PAL: use the kiosk dump that matches your plan
 (same region as retail unless you know you are mixing and will set Kiosk Menu Region).

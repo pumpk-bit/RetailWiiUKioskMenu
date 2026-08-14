@@ -30,7 +30,7 @@ Keep **retail Home Menu** as default boot so FTP still works. See [Default boot]
 - **Python 3** — only for `validate_slc_dump.ps1` before flashing
 - Retail **and** kiosk dumps, extracted yourself:
   - **SLC:** [NAND Extractor](https://github.com/koolkdev/wiiu-nandextract) — needs **otp.bin** from that NAND. Put the trees in `dumps\retail\` and `dumps\kiosk\` (read the text file in each folder).
-  - **Kiosk MLC** (Kiosk Menu / SCT / demos): [wfs-extract](https://github.com/koolkdev/wfs-tools) — `wfs-extract --input mlc.bin --otp otp.bin --dump-path Extracted`. Default: `dumps\kiosk\Extracted\`. Or set `KioskMlcSysTitleRoot` to wherever you extracted.
+  - **Kiosk MLC** (Kiosk Menu / SCT / demos): [wfs-extract](https://github.com/koolkdev/wfs-tools). Default: `dumps\kiosk\Extracted\`. Or set `KioskMlcSysTitleRoot` to wherever you extracted.
 - FTP to the Wii U while **Home Menu** is up
 - **redNAND:** 32 GB+ SD (Hybrid) or 64 GB+ (FullRedNand)
 - **sysNAND:** fresh minute SLC backup before touching internal NAND
