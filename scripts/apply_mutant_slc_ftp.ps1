@@ -3,7 +3,8 @@
 # Process (why):
 # 1) Trust local mutant built from YOUR extracts (build_mutant_slc.ps1).
 # 2) Warn + Y/N for DeploymentMode and every live SLC write.
-# 3) Upload certs/title.list/identity + only additive tickets (never delete retail tickets).
+# 3) Upload certs/title.list/identity + additive tickets (never delete retail tickets).
+#    Always overwrite Kiosk Menu + native SCT tickets (same path as retail, kiosk bytes).
 #    system.xml is built but only uploaded if you answer Y (default N - could cause instability).
 #    eco/prefs need -FullKioskPolicy. Leave Home Menu as default boot unless user opts into trap.
 
@@ -36,7 +37,14 @@ try {
     $cred = Get-RwkmFtpCredential -Config $cfg
     $base = Get-RwkmFtpBase -Config $cfg -Mount slc
 
-    Assert-RwkmMutantReady -MutantSlc $mutant
+    Assert-RwkmMutantReady -MutantSlc $mutant -RequiredRelPaths @(
+        'sys\config\system.xml'
+        'sys\config\sys_prod.xml'
+        'sys\rights\sys\cert.sys'
+        'sys\rights\sys\title.list'
+        'sys\rights\ticket\sys\0001\0000000b.tik'
+        'sys\rights\ticket\sys\0003\00000002.tik'
+    )
     Test-RwkmRegionConsistency -Config $cfg -Force:$Force | Out-Null
 
     $mode = Confirm-RwkmDeploymentMode -Config $cfg -Action 'PATCH live storage_slc (mutant licenses/config)' -Force:$Force
@@ -69,7 +77,7 @@ try {
   Region:   $($cfg.Region)
   Storage:  $slcWhere
   Scope:    $applyScope
-  Tickets:  ~$ticketCount additive uploads
+  Tickets:  ~$ticketCount additive uploads + force Kiosk Menu / native SCT .tik
   Plan:     $(if (Test-Path -LiteralPath $planPath) { $planPath } else { '(none - will scan mutant tickets)' })
 
 Have you run backup_slc_ftp.ps1 first?
@@ -123,28 +131,14 @@ $(if ($mode -eq 'SysNand') { 'Confirm you booted WITHOUT rednand.ini so this is 
     $live = Get-RwkmLiveTicketSet -FtpSlcBase $base -Credential $cred
 
     if (Test-Path -LiteralPath $planPath) {
-        $plan = Get-Content -LiteralPath $planPath -Raw | ConvertFrom-Json
+        $plan = @(Get-Content -LiteralPath $planPath -Raw | ConvertFrom-Json)
         $uploaded = 0; $skipped = 0
         foreach ($t in $plan) {
-            if ($live.Contains($t.Rel)) { $skipped++; continue }
+            if ($live.Contains([string]$t.Rel)) { $skipped++; continue }
             Invoke-RwkmFtpPut $t.Path "$base/sys/rights/ticket/$($t.Rel)" $cred
             $uploaded++
         }
         Write-RwkmLog "  uploaded=$uploaded skipped=$skipped"
-        $criticalSkipped = @(
-            'sys/0001/0000000b.tik'
-            'sys/0003/00000002.tik'
-        )
-        $skippedPath = Join-Path (Split-Path -Parent $planPath) 'tickets_skipped.txt'
-        if (Test-Path -LiteralPath $skippedPath) {
-            $skippedRels = Get-Content -LiteralPath $skippedPath -Encoding UTF8
-            foreach ($crit in $criticalSkipped) {
-                if ($skippedRels -contains $crit) {
-                    Write-RwkmLog "  WARN: live already has $crit (retail bytes?) - Kiosk Menu / SCT may fail to launch"
-                    Write-RwkmLog '  Force-upload from overlay\mutant\slc or kiosk extract - see README Cannot launch'
-                }
-            }
-        }
     } else {
         Write-RwkmLog "  No ticket plan at $planPath - uploading all mutant tickets not on live..."
         $tikRoot = Join-Path $mutant 'sys\rights\ticket'
@@ -154,6 +148,9 @@ $(if ($mode -eq 'SysNand') { 'Confirm you booted WITHOUT rednand.ini so this is 
             Invoke-RwkmFtpPut $f.FullName "$base/sys/rights/ticket/$rel" $cred
         }
     }
+
+    Write-RwkmLog '  Overwriting Kiosk Menu + native SCT tickets (retail already has these paths)...'
+    $null = Invoke-RwkmForceKioskLaunchTickets -MutantSlc $mutant -FtpSlcBase $base -Credential $cred
 
     Write-RwkmLog '[3/3] verify...'
     Invoke-RwkmCurlFtp -CurlArgs @('-s', '--ftp-pasv', "$base/sys/rights/sys/", '--user', $cred) -FailContext 'FTP verify rights' | Out-Host

@@ -43,6 +43,73 @@ function Get-RwkmRelativeUnixPath {
     return $fileFull.Substring($rootFull.Length).TrimStart('\').Replace('\', '/')
 }
 
+function Get-RwkmDefaultDumpPaths {
+    return @{
+        RetailSlcExtract     = '.\dumps\retail'
+        KioskSlcExtract      = '.\dumps\kiosk'
+        KioskMlcSysTitleRoot = '.\dumps\kiosk\Extracted\sys\title\00050010'
+    }
+}
+
+function Test-RwkmSlcExtractTree {
+    param([string]$Path)
+    if ([string]::IsNullOrWhiteSpace($Path)) { return $false }
+    return [bool](Test-Path -LiteralPath (Join-Path $Path 'sys\rights\sys\cert.sys'))
+}
+
+function Resolve-RwkmSlcExtractTree {
+    param([string]$Path)
+    if ([string]::IsNullOrWhiteSpace($Path)) { return $Path }
+    foreach ($candidate in @($Path, (Join-Path $Path 'slc'), (Join-Path $Path 'SLC'))) {
+        if (Test-RwkmSlcExtractTree $candidate) {
+            return (Resolve-Path -LiteralPath $candidate).Path
+        }
+    }
+    return $Path
+}
+
+function Get-RwkmDumpRootFromSlcExtract {
+    param([string]$SlcExtract)
+    if ([string]::IsNullOrWhiteSpace($SlcExtract)) {
+        return (Join-Path (Get-RwkmRepoRoot) 'dumps\kiosk')
+    }
+    $leaf = Split-Path -Leaf $SlcExtract
+    if ($leaf -match '^(slc|SLC)$') {
+        return (Split-Path -Parent $SlcExtract)
+    }
+    return $SlcExtract
+}
+
+function Resolve-RwkmKioskMlcSysTitleRoot {
+    param(
+        [string]$ConfiguredPath,
+        [string]$KioskSlcExtract
+    )
+    if ($ConfiguredPath -and (Test-Path -LiteralPath $ConfiguredPath)) {
+        return $ConfiguredPath
+    }
+    $roots = New-Object System.Collections.Generic.List[string]
+    if ($KioskSlcExtract) {
+        [void]$roots.Add((Get-RwkmDumpRootFromSlcExtract $KioskSlcExtract))
+        [void]$roots.Add($KioskSlcExtract)
+        $parent = Split-Path -Parent $KioskSlcExtract
+        if ($parent) { [void]$roots.Add($parent) }
+    }
+    $seen = @{}
+    foreach ($root in $roots) {
+        if ([string]::IsNullOrWhiteSpace($root) -or $seen.ContainsKey($root)) { continue }
+        $seen[$root] = $true
+        foreach ($rel in @('Extracted\sys\title\00050010', 'extracted\sys\title\00050010')) {
+            $guess = Join-Path $root $rel
+            if (Test-Path -LiteralPath $guess) {
+                return (Resolve-Path -LiteralPath $guess).Path
+            }
+        }
+    }
+    if ($ConfiguredPath) { return $ConfiguredPath }
+    return (Join-Path (Get-RwkmRepoRoot) 'dumps\kiosk\Extracted\sys\title\00050010')
+}
+
 function Import-RwkmConfig {
     param(
         [string]$ConfigPath,
@@ -102,6 +169,21 @@ function Import-RwkmConfig {
         }
     }
 
+    foreach ($key in @('RetailSlcExtract', 'KioskSlcExtract', 'KioskMlcSysTitleRoot')) {
+        if ($cfg.ContainsKey($key)) { $cfg[$key] = Resolve-CfgPath $cfg[$key] }
+    }
+    if ($cfg.ContainsKey('RetailSlcExtract')) {
+        $cfg.RetailSlcExtract = Resolve-RwkmSlcExtractTree $cfg.RetailSlcExtract
+    }
+    if ($cfg.ContainsKey('KioskSlcExtract')) {
+        $cfg.KioskSlcExtract = Resolve-RwkmSlcExtractTree $cfg.KioskSlcExtract
+    }
+    if ($cfg.ContainsKey('KioskMlcSysTitleRoot') -or $cfg.ContainsKey('KioskSlcExtract')) {
+        $cfg.KioskMlcSysTitleRoot = Resolve-RwkmKioskMlcSysTitleRoot `
+            -ConfiguredPath $(if ($cfg.ContainsKey('KioskMlcSysTitleRoot')) { $cfg.KioskMlcSysTitleRoot } else { '' }) `
+            -KioskSlcExtract $(if ($cfg.ContainsKey('KioskSlcExtract')) { $cfg.KioskSlcExtract } else { '' })
+    }
+
     return $cfg
 }
 
@@ -121,7 +203,8 @@ function Assert-RwkmMutantReady {
 Mutant SLC folder missing: $MutantSlc
 
 Fix: run  .\scripts\build_mutant_slc.ps1
-(after setting RetailSlcExtract / KioskSlcExtract in config.ps1).
+(after putting NAND Extractor output in dumps\retail and dumps\kiosk —
+ see dumps\retail\IN_HERE_PUT_THE_FILES_THAT_ARE_NEEDED.txt).
 "@
     }
 

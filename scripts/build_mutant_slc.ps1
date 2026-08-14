@@ -27,8 +27,17 @@ try {
     Test-RwkmRegionConsistency -Config $cfg -RetailExtract $retail -KioskExtract $kiosk -Force:$Force | Out-Null
 
     foreach ($p in @($retail, $kiosk)) {
-        if (-not (Test-Path -LiteralPath $p)) {
-            throw "Missing extract folder: $p - set RetailSlcExtract / KioskSlcExtract in config.ps1"
+        if (-not (Test-RwkmSlcExtractTree $p)) {
+            throw @"
+Missing SLC extract tree: $p
+
+Need sys\rights\sys\cert.sys (NAND Extractor output).
+
+Fix:
+  Retail -> dumps\retail   (see dumps\retail\IN_HERE_PUT_THE_FILES_THAT_ARE_NEEDED.txt)
+  Kiosk  -> dumps\kiosk    (see dumps\kiosk\IN_HERE_PUT_THE_FILES_THAT_ARE_NEEDED.txt)
+  or set RetailSlcExtract / KioskSlcExtract in config.ps1.
+"@
         }
     }
 
@@ -217,6 +226,41 @@ try {
     [IO.File]::WriteAllText($outSys, $outSysText)
     Log "system.xml: coldboot $homeTitle (retail menu), kiosk policy fields (apply script asks Y/N before FTP)"
 
+    function Set-RwkmSystemXmlDefaultTitleId([string]$xml, [string]$titleId) {
+        $tid = $titleId.ToString().Trim()
+        if ($tid -notmatch '^00050010') { $tid = "00050010$tid" }
+        $tid = $tid.ToLowerInvariant()
+        $updated = [regex]::Replace(
+            $xml,
+            '(?s)(<default_title_id[^>]*>\s*)[0-9A-Fa-f]{16}(\s*</default_title_id>)',
+            "`${1}$tid`${2}",
+            1
+        )
+        if ($updated -eq $xml) {
+            throw "Could not set default_title_id to $tid in system.xml (no matching tag)."
+        }
+        return $updated
+    }
+
+    $sctTitle = if ($cfg.NativeSctTitleId) { $cfg.NativeSctTitleId } else { '1f700500' }
+    $menuTitle = if ($cfg.KioskMenuTitleId) { $cfg.KioskMenuTitleId } else { '1fa81000' }
+    $coldbootVariants = @(
+        @{ File = 'system.xml.kioskboot'; TitleId = $sctTitle; Label = 'native SCT' }
+        @{ File = 'system.xml.kioskmenu'; TitleId = $menuTitle; Label = 'Kiosk Menu' }
+    )
+    foreach ($variant in $coldbootVariants) {
+        $dest = Join-Path $mutant "sys\config\$($variant.File)"
+        $fromDump = Join-Path $kiosk "sys\config\$($variant.File)"
+        if (Test-Path -LiteralPath $fromDump) {
+            Copy-Item -LiteralPath $fromDump -Destination $dest -Force
+            Log "copied from kiosk dump: $($variant.File)"
+        } else {
+            $variantXml = Set-RwkmSystemXmlDefaultTitleId $outSysText $variant.TitleId
+            [IO.File]::WriteAllText($dest, $variantXml)
+            Log "synthesized $($variant.File) (coldboot $($variant.Label))"
+        }
+    }
+
     if ($FullKioskPolicy) {
         $patchFiles = @(
             'sys\config\eco.xml',
@@ -234,14 +278,6 @@ try {
         }
     } else {
         Log 'prefs skipped: eco.xml, caffeine.xml, im_cfg.xml, nn.xml (use -FullKioskPolicy for kiosk prefs)'
-    }
-
-    foreach ($variant in @('system.xml.kioskboot', 'system.xml.kioskmenu')) {
-        $ks = Join-Path $kiosk "sys\config\$variant"
-        if (Test-Path -LiteralPath $ks) {
-            Copy-Item -LiteralPath $ks -Destination (Join-Path $mutant "sys\config\$variant") -Force
-            Log "copied optional: $variant"
-        }
     }
 
     $logRoot = if ($outRoot) { $outRoot } else { $mutant }

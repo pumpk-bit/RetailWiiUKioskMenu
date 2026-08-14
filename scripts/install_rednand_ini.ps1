@@ -19,6 +19,22 @@ try {
     $cfg = Import-RwkmConfig -ConfigPath $ConfigPath
     $repo = Get-RwkmRepoRoot
     $mode = if ($Mode) { $Mode } else { Get-RwkmDeploymentMode -Config $cfg }
+
+    if ($mode -eq 'SysNand' -and -not $DestIni) {
+        $letter = Get-RwkmNormalizedDriveLetter $cfg.SdDriveLetter
+        if (-not $letter) {
+            Write-RwkmLog 'SysNand: SdDriveLetter is not set — no SD rednand.ini to disable.'
+            Write-RwkmLog 'Boot minute: Patch (slc) -> boot IOS (slc). Do not boot redNAND.'
+            Stop-RwkmSession -ExitCode 0
+        }
+        $probeMinute = "${letter}:\minute"
+        if (-not (Test-Path -LiteralPath $probeMinute)) {
+            Write-RwkmLog "SysNand: $probeMinute not found (SD not inserted?). Nothing to disable."
+            Write-RwkmLog 'Boot minute: Patch (slc) -> boot IOS (slc). Do not boot redNAND.'
+            Stop-RwkmSession -ExitCode 0
+        }
+    }
+
     $dst = if ($DestIni) { $DestIni } else { Get-RwkmMinuteIniPath -Config $cfg }
 
     $dstDir = Split-Path -Parent $dst

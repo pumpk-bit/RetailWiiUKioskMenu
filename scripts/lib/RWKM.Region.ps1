@@ -1,22 +1,31 @@
 # USA / PAL region presets and consistency checks.
 
 function Get-RwkmRegionPresets {
+    $dumps = if (Get-Command Get-RwkmDefaultDumpPaths -ErrorAction SilentlyContinue) {
+        Get-RwkmDefaultDumpPaths
+    } else {
+        @{
+            RetailSlcExtract     = '.\dumps\retail'
+            KioskSlcExtract      = '.\dumps\kiosk'
+            KioskMlcSysTitleRoot = '.\dumps\kiosk\Extracted\sys\title\00050010'
+        }
+    }
     return @{
         USA = @{
             Label                   = 'USA (NTSC)'
             RetailSystemMenuTitleId = '10040100'
-            RetailSlcExtract        = '.\dumps\usa\retail\slc'
-            KioskSlcExtract         = '.\dumps\usa\kiosk\slc'
-            KioskMlcSysTitleRoot    = '.\dumps\usa\kiosk\extracted\sys\title\00050010'
+            RetailSlcExtract        = $dumps.RetailSlcExtract
+            KioskSlcExtract         = $dumps.KioskSlcExtract
+            KioskMlcSysTitleRoot    = $dumps.KioskMlcSysTitleRoot
             CountryHints            = @('US', 'USA', 'CA', 'MX')
             ProductAreas            = @(1, 2)
         }
         PAL = @{
             Label                   = 'PAL (EUR)'
             RetailSystemMenuTitleId = '10040200'
-            RetailSlcExtract        = '.\dumps\pal\retail\slc'
-            KioskSlcExtract         = '.\dumps\pal\kiosk\slc'
-            KioskMlcSysTitleRoot    = '.\dumps\pal\kiosk\extracted\sys\title\00050010'
+            RetailSlcExtract        = $dumps.RetailSlcExtract
+            KioskSlcExtract         = $dumps.KioskSlcExtract
+            KioskMlcSysTitleRoot    = $dumps.KioskMlcSysTitleRoot
             CountryHints            = @('EU', 'DE', 'FR', 'GB', 'UK', 'ES', 'IT', 'NL', 'AU', 'NZ')
             ProductAreas            = @(3, 4)
         }

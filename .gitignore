@@ -4,7 +4,13 @@ config/config.ps1
 # User dumps and built images — never commit
 stripped/
 backup/
-dumps/
+dumps/*
+!dumps/retail/
+!dumps/kiosk/
+dumps/retail/*
+dumps/kiosk/*
+!dumps/retail/IN_HERE_PUT_THE_FILES_THAT_ARE_NEEDED.txt
+!dumps/kiosk/IN_HERE_PUT_THE_FILES_THAT_ARE_NEEDED.txt
 overlay/mutant/**
 !overlay/mutant/.gitkeep
 *.bin

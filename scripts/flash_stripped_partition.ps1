@@ -7,7 +7,6 @@
 param(
     [Parameter(ParameterSetName = 'Explicit')]
     [string]$StrippedPath,
-    [Parameter(ParameterSetName = 'Explicit')]
     [ValidateSet('slc','slccmpt')]
     [string]$Partition = 'slc',
     [int]$DiskNum = 0,

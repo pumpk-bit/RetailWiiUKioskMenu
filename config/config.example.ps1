@@ -44,14 +44,17 @@
 
     StrippedDir = '.\stripped'
 
-    # --- Extracted SLC folders ---
-    RetailSlcExtract = '.\dumps\pal\retail\slc'    # USA: .\dumps\usa\retail\slc
-    KioskSlcExtract  = '.\dumps\pal\kiosk\slc'
+    # --- Extracted dumps (see dumps\retail\ and dumps\kiosk\ instruction text files) ---
+    # SLC: NAND Extractor + otp.bin into dumps\retail and dumps\kiosk (sys\ at top, or nested slc\).
+    # MLC: optional — wfs-extract --input mlc.bin --otp otp.bin --dump-path Extracted
+    #      inside dumps\kiosk, OR set KioskMlcSysTitleRoot to your extract's sys\title\00050010.
+    RetailSlcExtract = '.\dumps\retail'
+    KioskSlcExtract  = '.\dumps\kiosk'
 
     MutantSlc = '.\overlay\mutant\slc'
     LiveSlcBackup = '.\backup\live_slc_pre_mutant'
 
-    KioskMlcSysTitleRoot = '.\dumps\pal\kiosk\extracted\sys\title\00050010'
+    KioskMlcSysTitleRoot = '.\dumps\kiosk\Extracted\sys\title\00050010'
 
     KioskMenuTitleId = '1fa81000'
     NativeSctTitleId = '1f700500'   # Required — launch Kiosk Menu from SCT

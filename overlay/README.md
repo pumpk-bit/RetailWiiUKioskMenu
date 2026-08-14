@@ -11,16 +11,16 @@ Gitignored until you build. This repo does not ship dumps, certs, or tickets.
 | File | Change |
 |------|--------|
 | `cert.sys` | Retail + kiosk chains |
-| `ticket/**/*.tik` | New kiosk tickets only |
+| `ticket/**/*.tik` | Kiosk tickets (including overwrite of same-path retail files) |
 | `title.list` | Combined IDs |
 | `sys_prod.xml` | **WIS-001** / **FW** (region/serial stay retail) — do not Submit to WiiUIdent |
 | `system.xml` | Home Menu coldboot + kiosk policy fields (built; **not** FTP'd unless you answer **Y**) |
-| `system.xml.kioskboot` | Coldboot → native SCT (`swap_coldboot_ftp.ps1 -Mode sct`) |
-| `system.xml.kioskmenu` | Coldboot → Kiosk Menu (`-Mode kioskmenu`; trap risk) |
+| `system.xml.kioskboot` | Coldboot → native SCT (`swap_coldboot_ftp.ps1 -Mode sct`) — **synthesized** from merged `system.xml` |
+| `system.xml.kioskmenu` | Coldboot → Kiosk Menu (`-Mode kioskmenu`; trap risk) — **synthesized** |
 
-**`apply_mutant_slc_ftp.ps1`** always uploads certs, title.list, sys_prod, and additive tickets. It then asks **Y/N** to upload `system.xml` (**default N** — could cause instability). Pass **`-ApplySystemXml`** to upload without the prompt. **`-FullKioskPolicy`** also uploads eco/prefs.
+**`apply_mutant_slc_ftp.ps1`** always uploads certs, title.list, sys_prod, additive tickets, and **overwrites Kiosk Menu + native SCT `.tik`** (retail already has those paths). It then asks **Y/N** to upload `system.xml` (**default N** — could cause instability). Pass **`-ApplySystemXml`** to upload without the prompt. **`-FullKioskPolicy`** also uploads eco/prefs.
 
-**Launch tickets:** additive apply skips paths already on live SLC. If SCT/Kiosk Menu say *Cannot launch this title*, see [README troubleshooting](../README.md#cannot-launch-this-title-sct-or-kiosk-menu). For other apps/demos see [Adding tickets](../README.md#adding-tickets-for-more-apps-demos-kiosk-titles).
+If SCT/Kiosk Menu still say *Cannot launch this title* after an older apply, run `.\scripts\force_kiosk_launch_tickets_ftp.ps1` — see [PROBLEMS.md](../docs/PROBLEMS.md#cannot-launch-this-title-sct-or-kiosk-menu). Adding demos: [README](../README.md#adding-demos).
 
 Scripts check required files exist before any FTP write and ask **Y/N** for every live SLC change.
 

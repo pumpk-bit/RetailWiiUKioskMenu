@@ -90,7 +90,7 @@ try {
         if (-not $src -or -not (Test-Path -LiteralPath $src)) {
             throw @"
 No retail im_cfg.xml source. Use -LocalImCfg or set RetailSlcExtract in config.ps1.
-Example: RetailSlcExtract = '..\WiiUDumps\WiiU Retail EUR\slc'
+Default drop folder: dumps\retail\sys\proc\prefs\im_cfg.xml
 "@
         }
         Confirm-RwkmWiiUFtpWrite -Config $cfg -Mount slc -Force:$Force -Level Critical `

@@ -12,21 +12,31 @@ param(
 $ErrorActionPreference = 'Stop'
 $scriptDir = $PSScriptRoot
 . (Join-Path $scriptDir 'lib\RWKM.Config.ps1')
+. (Join-Path $scriptDir 'lib\RWKM.Tickets.ps1')
 Initialize-RwkmScript -Name 'map_kiosk_demo_tickets' -Force:$Force
 
 function Get-RwkmDemoMlcDefault {
     param([string]$KioskSlc)
-    $kioskRoot = Split-Path -Parent $KioskSlc
-    foreach ($extracted in @('Extracted', 'extracted')) {
-        $candidate = Join-Path $kioskRoot "$extracted\usr\title\00050002"
-        if (Test-Path -LiteralPath $candidate) { return $candidate }
+    $roots = @($KioskSlc)
+    $parent = Split-Path -Parent $KioskSlc
+    if ($parent) { $roots += $parent }
+    foreach ($root in $roots) {
+        if (-not $root) { continue }
+        foreach ($extracted in @('Extracted', 'extracted')) {
+            $candidate = Join-Path $root "$extracted\usr\title\00050002"
+            if (Test-Path -LiteralPath $candidate) { return $candidate }
+        }
     }
-    return Join-Path $kioskRoot 'Extracted\usr\title\00050002'
+    return (Join-Path $KioskSlc 'Extracted\usr\title\00050002')
 }
 
 function Get-RwkmTitleIdFromFolder {
     param([string]$FolderPath)
     $name = Split-Path -Leaf $FolderPath
+    # Prefer full 16-char title ID if present (e.g. 0005000210117e00).
+    if ($name -match '^([0-9A-Fa-f]{16})') {
+        return $Matches[1].ToUpperInvariant()
+    }
     if ($name -match '^([0-9A-Fa-f]{8})') {
         return ('00050002' + $Matches[1]).ToUpperInvariant()
     }
@@ -70,26 +80,6 @@ function Get-RwkmStubHint {
     return 'playable'
 }
 
-function Build-RwkmTicketIndex {
-    param([string]$TicketRoot)
-    $index = @{}
-    if (-not (Test-Path -LiteralPath $TicketRoot)) {
-        throw "SLC ticket folder missing: $TicketRoot"
-    }
-
-    Get-ChildItem -LiteralPath $TicketRoot -Recurse -Filter *.tik | ForEach-Object {
-        $hex = ([BitConverter]::ToString([IO.File]::ReadAllBytes($_.FullName))).Replace('-', '')
-        foreach ($m in [regex]::Matches($hex, '00050002[0-9A-F]{8}')) {
-            $tid = $m.Value.ToUpperInvariant()
-            if (-not $index.ContainsKey($tid)) {
-                $rel = Get-RwkmRelativeUnixPath -Root $TicketRoot -FullPath $_.FullName
-                $index[$tid] = $rel
-            }
-        }
-    }
-    return $index
-}
-
 try {
     $cfg = Import-RwkmConfig -ConfigPath $ConfigPath -SkipRegionPrompt
     $kioskSlc = if ($KioskSlcExtract) { $KioskSlcExtract } else { $cfg.KioskSlcExtract }
@@ -101,16 +91,24 @@ try {
         Join-Path $cfg.LiveSlcBackup 'kiosk_demo_ticket_map.txt'
     }
 
-    if (-not (Test-Path -LiteralPath $kioskSlc)) {
-        throw "Kiosk SLC extract missing: $kioskSlc`nSet KioskSlcExtract in config.ps1 or pass -KioskSlcExtract"
+    if (-not (Test-RwkmSlcExtractTree $kioskSlc)) {
+        throw @"
+Kiosk SLC extract missing (need sys\rights\sys\cert.sys): $kioskSlc
+
+Put NAND Extractor output in dumps\kiosk (see dumps\kiosk\IN_HERE_PUT_THE_FILES_THAT_ARE_NEEDED.txt)
+or pass -KioskSlcExtract / set KioskSlcExtract in config.ps1.
+"@
     }
     if (-not (Test-Path -LiteralPath $mlcRoot)) {
         throw @"
 Kiosk demo MLC folder missing: $mlcRoot
 
-Set -DemoMlcRoot to your extracted usr/title/00050002 folder, or place extracts at:
-  <kiosk-dump-root>/Extracted/usr/title/00050002
-(next to the slc folder configured as KioskSlcExtract).
+Set -DemoMlcRoot to your extracted usr/title/00050002 folder, or extract kiosk MLC with:
+
+  wfs-extract --input mlc.bin --otp otp.bin --dump-path Extracted
+
+into dumps\kiosk so this exists:
+  dumps\kiosk\Extracted\usr\title\00050002
 "@
     }
 
@@ -156,7 +154,7 @@ Set -DemoMlcRoot to your extracted usr/title/00050002 folder, or place extracts 
         }
 
         if ($ticketIndex.ContainsKey($tid)) {
-            [void]$rows.Add(("{0}`t{1}`t{2}`t{3}`t{4}" -f $dir.Name, $tid, $kind, $ticketIndex[$tid], $product))
+            [void]$rows.Add(("{0}`t{1}`t{2}`t{3}`t{4}" -f $dir.Name, $tid, $kind, $ticketIndex[$tid].TicketRel, $product))
             $mapped++
         } else {
             [void]$rows.Add(("{0}`t{1}`t{2}`t{3}`t{4}" -f $dir.Name, $tid, $kind, 'NOT_IN_SLC', $product))

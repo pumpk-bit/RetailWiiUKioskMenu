@@ -14,7 +14,9 @@ Licenses on the **SD** (redSLC). Kiosk Menu on **sys MLC** (Hybrid) or **red MLC
 2. SD card — minute **Format redNAND** (backs up the card first):
    - **Hybrid:** **32 GB+** is usually enough (redSLC + minute FAT; sys MLC stays on console)
    - **FullRedNand:** **64 GB+** recommended (red SLC **and** red MLC on SD — size depends on your MLC dump)
-3. Retail + kiosk dumps extracted on PC ([wiiu-nandextract](https://github.com/koolkdev/wiiu-nandextract) / [wfs-tools](https://github.com/koolkdev/wfs-tools))
+3. Retail + kiosk dumps extracted on PC:
+   - **SLC** with [NAND Extractor](https://github.com/koolkdev/wiiu-nandextract) + **otp.bin** → `dumps\retail\` and `dumps\kiosk\` (see the text file in each folder)
+   - **Kiosk MLC** with [wfs-extract](https://github.com/koolkdev/wfs-tools): `wfs-extract --input mlc.bin --otp otp.bin --dump-path Extracted` inside `dumps\kiosk`, **or** set `KioskMlcSysTitleRoot` to your extract
 4. `.\scripts\setup_config.ps1` — Region, **your** Wii U IP, **your** SD drive letter (from This PC — the volume with `\minute\`). Scripts resolve the disk number from that letter; they never guess `E:` or auto-pick a USB stick.
 5. Set **`DeploymentMode`** in config:
    - **`Hybrid`** (default) — redSLC on SD + **sys** MLC (your games stay on console)
@@ -22,7 +24,7 @@ Licenses on the **SD** (redSLC). Kiosk Menu on **sys MLC** (Hybrid) or **red MLC
 
 Windows shows a FAT drive (whatever letter Windows assigned, with `\minute\`) plus hidden ~512 MB partitions. Flash scripts need **Administrator** PowerShell and ask **Y/N** before writing.
 
-Shared concepts (SCT, coldboot, stub demos): [README](../README.md#system-config-tool).
+Shared concepts (SCT, coldboot, demos): [README](../README.md). Problems / undo: [PROBLEMS.md](PROBLEMS.md).
 
 ---
 
@@ -110,11 +112,11 @@ Wii U on, Home Menu up, FTP plugin running, same Wi‑Fi as PC. Each script asks
 
 Default apply uploads **rights + identity** (cert, title.list, sys_prod, tickets). You are then asked **Y/N** to upload **system.xml** — **default N** (could cause instability; Kiosk Menu works without it). **`-ApplySystemXml`** uploads without asking. **`-FullKioskPolicy`** also uploads eco/prefs.
 
-When asked about Kiosk Menu as default boot → **N**. Once trapped, Home never loads → **FTP plugins never start**. Undo is **re-flash clean redSLC** on the SD (PC), not `make_home_menu_default.ps1`.
+When asked about Kiosk Menu as default boot → **N**. Once trapped, Home never loads → **FTP plugins never start**. Undo: [PROBLEMS.md](PROBLEMS.md#stuck-in-kiosk-menu-coldboot).
 
 Quick check: `cert.sys` under `storage_slc/sys/rights/sys/` should be ~6656 bytes.
 
-If SCT/Kiosk Menu say *Cannot launch this title* after apply, see [README — launch tickets](../README.md#cannot-launch-this-title-sct-or-kiosk-menu) (additive apply may skip kiosk tickets at retail paths).
+If SCT/Kiosk Menu say *Cannot launch this title* after apply, run `.\scripts\force_kiosk_launch_tickets_ftp.ps1` — [PROBLEMS.md](PROBLEMS.md#cannot-launch-this-title-sct-or-kiosk-menu).
 
 ---
 
@@ -137,36 +139,14 @@ If you use coldboot **option 2** (`swap_coldboot_ftp.ps1 -Mode sct`), native SCT
 
 **Launch:** Home → **SCT** → Kiosk Menu.
 
-**Demo titles:** Do **not** launch stub / `non_playable_demo.rpx` titles from Home or SCT — use **`playable`** rows from the ticket map. Prefer Kiosk Menu when demos show up there; if not, **Home Menu** often works ([README — known limitation](../README.md#demos-launch-on-home-menu-but-not-from-kiosk-menu)).
+In SCT: **Title Launcher** → **System NAND memory (mlc)** → **Kiosk Menu** → **A** → confirm **Title Type: Menu** before launch. If you have no retail SCT on Home, install `13374454` via WUP Installer GX or coldboot native SCT (`swap_coldboot_ftp.ps1 -Mode sct`). Details: [README — SCT](../README.md#system-config-tool).
 
-Empty demo grid inside Kiosk Menu is common on retail + mutant setups even when MLC folders exist. On **Hybrid**, your retail Home Menu library on **sys MLC** is unchanged unless you delete titles — use it to play demos Kiosk Menu refuses.
+More demos: [README — Adding demos](../README.md#adding-demos). Launch / grid issues: [PROBLEMS.md](PROBLEMS.md).
 
-Launch failures: [README — Cannot launch](../README.md#cannot-launch-this-title-sct-or-kiosk-menu). Adding more demos: [Adding tickets](../README.md#adding-tickets-for-more-apps-demos-kiosk-titles).
-
----
-
-## Idle reboots (after kiosk / demo use)
-
-Kiosk software can turn on ~2 minute idle reboot (`im_cfg.xml` → `reset_enable=1`). Fix on PC (writes live **redSLC** on Hybrid, or sys SLC on SysNand):
-
-```powershell
-.\scripts\restore_im_cfg_ftp.ps1
-```
-
-Details: [SYSNAND — Idle reboots](SYSNAND.md#idle-reboots-after-kiosk-menu--demos) (same file path on `storage_slc`).
+**After first Kiosk Menu use:** idle reboot on Home (~2 min) is common. In **Kiosk Settings**, set **No-Input Reset → Off**. If it still reboots when idle: `.\scripts\restore_im_cfg_ftp.ps1` — [PROBLEMS.md — Idle reboot](PROBLEMS.md#idle-reboot-after-kiosk-menu--demos).
 
 ---
 
-## Recovery / mistakes
+## Idle reboots / recovery
 
-| Problem | Fix |
-|---------|-----|
-| Bad redSLC | Fresh SLC.RAW → strip → validate → flash → re-apply mutant |
-| **Cannot launch SCT / Kiosk Menu** | [Launch-ticket skip bug](../README.md#cannot-launch-this-title-sct-or-kiosk-menu) — force-upload two tickets |
-| **Demo works on Home, not Kiosk Menu** | [Known limitation](../README.md#demos-launch-on-home-menu-but-not-from-kiosk-menu) — use Home Menu |
-| Stuck in Kiosk Menu coldboot | Re-flash clean redSLC on SD — no Home Menu means no FTP plugins |
-| Pull SD while kiosk runs | Crash — licenses are on redSLC |
-| Idle reboot outside Kiosk Menu | `restore_im_cfg_ftp.ps1` |
-| Undo kiosk entirely | Clean retail redSLC flash; delete uploaded titles from MLC if you want |
-
-Full script list and warnings: [README.md](../README.md).
+Idle reboot, *Cannot launch*, demo grid, coldboot trap, full undo: **[PROBLEMS.md](PROBLEMS.md)**.

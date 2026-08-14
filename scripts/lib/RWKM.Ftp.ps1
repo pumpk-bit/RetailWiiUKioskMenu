@@ -99,7 +99,6 @@ function Assert-RwkmFtpReady {
     Test-RwkmCurlPresent
 
     $cred = Get-RwkmFtpCredential -Config $Config
-    $ports = if ($Config.FtpPort) { @([int]$Config.FtpPort) } else { @(21) }
     $mounts = switch ($Mount) {
         'slc' { @('slc') }
         'mlc' { @('mlc') }
@@ -173,13 +172,10 @@ function Invoke-RwkmFtpPutOptional {
 
 function Get-RwkmFtpListLines {
     param([string]$Url, [string]$Credential)
-    try {
-        $raw = Invoke-RwkmCurlFtp -CurlArgs @(
-            '-s', '--ftp-pasv', $Url, '--user', $Credential
-        ) -FailContext "FTP LIST $Url"
-    } catch {
-        return @()
-    }
+    # Successful empty listing => @(). Curl failure must throw (do not treat as "no files").
+    $raw = Invoke-RwkmCurlFtp -CurlArgs @(
+        '-s', '--ftp-pasv', $Url, '--user', $Credential
+    ) -FailContext "FTP LIST $Url"
     if (-not $raw) { return @() }
     $text = if ($raw -is [array]) { $raw -join "`n" } else { [string]$raw }
     return ($text -split "`r?`n" | Where-Object { $_ -ne '' })
@@ -200,9 +196,109 @@ function Invoke-RwkmFtpGet {
     ) -FailContext "FTP GET $RemoteUrl"
 }
 
+function Test-RwkmFtpRemoteExists {
+    param(
+        [Parameter(Mandatory = $true)][string]$RemoteUrl,
+        [Parameter(Mandatory = $true)][string]$Credential
+    )
+    Test-RwkmCurlPresent
+    $tmp = [IO.Path]::GetTempFileName()
+    try {
+        $null = & curl.exe @(
+            '-s', '--ftp-pasv', '--connect-timeout', '8', '--max-time', '20',
+            $RemoteUrl, '--user', $Credential, '-o', $tmp
+        ) 2>$null
+        return ($LASTEXITCODE -eq 0)
+    } finally {
+        Remove-Item -LiteralPath $tmp -Force -ErrorAction SilentlyContinue
+    }
+}
+
+function Invoke-RwkmFtpDelete {
+    param(
+        [Parameter(Mandatory = $true)][string]$RemoteUrl,
+        [Parameter(Mandatory = $true)][string]$Credential
+    )
+    $uri = [Uri]$RemoteUrl
+    $path = $uri.AbsolutePath.TrimStart('/')
+    if (-not $path) { throw "FTP delete URL has no path: $RemoteUrl" }
+
+    $hostPort = "$($uri.Host)$(if ($uri.Port -ne -1 -and $uri.Port -ne 0) { ":$($uri.Port)" })"
+    $parts = @($path -split '/' | Where-Object { $_ -ne '' })
+    if ($parts.Count -lt 2) {
+        throw "FTP delete path too short: $RemoteUrl"
+    }
+
+    $mount = $parts[0]
+    $deleRel = ($parts[1..($parts.Count - 1)] -join '/')
+    $rootUrl = "$($uri.Scheme)://${hostPort}/"
+    $mountUrl = "$($uri.Scheme)://${hostPort}/${mount}/"
+
+    # curl always LISTs the URL after -Q. Prefer listing storage_slc/ (stable on FTPiiU)
+    # with a mount-relative DELE; fall back to root + full storage_slc/... path.
+    $attempts = @(
+        @{ ListUrl = $mountUrl; DelePath = $deleRel },
+        @{ ListUrl = $mountUrl; DelePath = $path },
+        @{ ListUrl = $rootUrl;  DelePath = $path }
+    )
+
+    $lastErr = $null
+    foreach ($a in $attempts) {
+        try {
+            $null = Invoke-RwkmCurlFtp -CurlArgs @(
+                '-s', '--ftp-pasv', '--list-only',
+                $a.ListUrl, '--user', $Credential,
+                '-Q', "DELE $($a.DelePath)"
+            ) -FailContext "FTP DELE $RemoteUrl"
+            return
+        } catch {
+            $lastErr = $_
+            # DELE may have worked; curl then failed the follow-up LIST.
+            if (-not (Test-RwkmFtpRemoteExists -RemoteUrl $RemoteUrl -Credential $Credential)) {
+                return
+            }
+        }
+    }
+
+    throw $lastErr.Exception.Message
+}
+
+function Get-RwkmKioskLaunchTicketRels {
+    # Same paths on PAL and USA kiosk dumps. Bytes differ — use YOUR mutant / kiosk extract.
+    return @(
+        'sys/0001/0000000b.tik'
+        'sys/0003/00000002.tik'
+    )
+}
+
+function Invoke-RwkmForceKioskLaunchTickets {
+    param(
+        [Parameter(Mandatory = $true)][string]$MutantSlc,
+        [Parameter(Mandatory = $true)][string]$FtpSlcBase,
+        [Parameter(Mandatory = $true)][string]$Credential
+    )
+    $uploaded = 0
+    foreach ($rel in (Get-RwkmKioskLaunchTicketRels)) {
+        $local = Join-Path $MutantSlc ('sys\rights\ticket\' + ($rel -replace '/', '\'))
+        if (-not (Test-Path -LiteralPath $local)) {
+            throw @"
+Missing kiosk launch ticket: $local
+
+Fix: run .\scripts\build_mutant_slc.ps1 so mutant has kiosk bytes at:
+  sys/rights/ticket/$rel
+"@
+        }
+        Invoke-RwkmFtpPut -LocalPath $local -RemoteUrl "$FtpSlcBase/sys/rights/ticket/$rel" -Credential $Credential
+        Write-RwkmLog "  force-uploaded launch ticket $rel"
+        $uploaded++
+    }
+    return $uploaded
+}
+
 function Get-RwkmLiveTicketSet {
     param([string]$FtpSlcBase, [string]$Credential)
-    $live = New-Object 'System.Collections.Generic.HashSet[string]'
+    # Case-insensitive: FTPiiU listing case may not match the local mutant path.
+    $live = New-Object 'System.Collections.Generic.HashSet[string]' ([StringComparer]::OrdinalIgnoreCase)
     foreach ($kind in @('apps','sys')) {
         $dirs = @()
         foreach ($line in (Get-RwkmFtpListLines "$FtpSlcBase/sys/rights/ticket/$kind/" $Credential)) {

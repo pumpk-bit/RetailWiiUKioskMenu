@@ -1,0 +1,40 @@
+IN HERE PUT THE FILES THAT ARE NEEDED
+=====================================
+
+This folder is the KIOSK / Cat-I SLC extract.
+
+1) Get otp.bin from the SAME kiosk dump (the otp that decrypts that NAND).
+2) Extract the kiosk SLC with NAND Extractor (needs otp.bin):
+     https://github.com/koolkdev/wiiu-nandextract
+   Dump into THIS folder.
+
+After extract, these paths must exist (sys\ at the top, or inside a nested slc\):
+
+  sys\config\system.xml
+  sys\config\sys_prod.xml
+  sys\rights\sys\cert.sys
+  sys\rights\sys\title.list
+  sys\rights\ticket\          (many .tik files)
+
+Kiosk MLC (Kiosk Menu, native SCT, demos) is SEPARATE. Two options:
+
+  A) Extract here (default the scripts look for):
+
+       wfs-extract --input mlc.bin --otp otp.bin --dump-path Extracted
+
+     Use the kiosk mlc.bin + that dump's otp.bin.
+     https://github.com/koolkdev/wfs-tools
+
+     Then this folder should contain:
+
+       Extracted\sys\title\00050010\1fa81000\    Kiosk Menu
+       Extracted\sys\title\00050010\1f700500\    native System Config Tool
+       Extracted\usr\title\00050002\             demo titles (optional)
+
+  B) Extract MLC anywhere else, then either:
+       - point KioskMlcSysTitleRoot in config\config.ps1 at
+         <your-extract>\sys\title\00050010
+       - or copy/move that Extracted tree into this folder as Extracted\
+
+Do not commit dumps. USA vs PAL: use the kiosk dump that matches your plan
+(same region as retail unless you know you are mixing and will set Kiosk Menu Region).
