@@ -55,7 +55,7 @@
 
     KioskMenuTitleId = '1fa81000'
     NativeSctTitleId = '1f700500'   # Required — launch Kiosk Menu from SCT
-    # RetailSctTitleId = '13374454' # Retail homebrew SCT — WUP Installer GX
+    # RetailSctTitleId = '13374454' # Retail/homebrew SCT — WUP Installer GX if native 1f700500 missing
     SugarBootTitleId = '1fa83200'
 
     RetailSystemMenuTitleId = '10040200'   # PAL Home Menu; USA: 10040100

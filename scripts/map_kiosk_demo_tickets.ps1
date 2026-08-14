@@ -16,8 +16,11 @@ Initialize-RwkmScript -Name 'map_kiosk_demo_tickets' -Force:$Force
 
 function Get-RwkmDemoMlcDefault {
     param([string]$KioskSlc)
-    # .../Cat-I USA/slc -> .../Cat-I USA/Extracted/usr/title/00050002
     $kioskRoot = Split-Path -Parent $KioskSlc
+    foreach ($extracted in @('Extracted', 'extracted')) {
+        $candidate = Join-Path $kioskRoot "$extracted\usr\title\00050002"
+        if (Test-Path -LiteralPath $candidate) { return $candidate }
+    }
     return Join-Path $kioskRoot 'Extracted\usr\title\00050002'
 }
 
@@ -45,6 +48,7 @@ function Get-RwkmStubHint {
         [string]$TitleId = ''
     )
     $cos = Join-Path $FolderPath 'code\cos.xml'
+    if ($TitleId -and $TitleId.EndsWith('FF', [StringComparison]::OrdinalIgnoreCase)) { return 'stub' }
     if (-not (Test-Path -LiteralPath $cos)) { return 'unknown' }
     $text = [IO.File]::ReadAllText($cos)
     if ($text -match 'non_playable_demo\.rpx') { return 'stub' }

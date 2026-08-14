@@ -88,18 +88,17 @@ try {
 
     $retailMap = Get-TicketRelMap $retailTik
     $kioskMap  = Get-TicketRelMap $kioskTik
-    $copied = 0; $skipped = 0
+    $copied = 0; $overwritten = 0
     foreach ($rel in $kioskMap.Keys) {
-        if ($retailMap.ContainsKey($rel)) { $skipped++; continue }
         $dest = Join-Path $mutantTik ($rel -replace '/','\')
         $destDir = Split-Path -Parent $dest
         if (-not (Test-Path -LiteralPath $destDir)) {
             New-Item -ItemType Directory -Force -Path $destDir | Out-Null
         }
         Copy-Item -LiteralPath $kioskMap[$rel] -Destination $dest -Force
-        $copied++
+        if ($retailMap.ContainsKey($rel)) { $overwritten++ } else { $copied++ }
     }
-    Log "tickets: copied $copied kiosk-only; skipped $skipped existing retail paths"
+    Log "tickets: copied $copied kiosk-only; overwritten $overwritten retail paths with kiosk bytes"
 
     function Read-TitleList([string]$path) {
         $b = [IO.File]::ReadAllBytes($path)

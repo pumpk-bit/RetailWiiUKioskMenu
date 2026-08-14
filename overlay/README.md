@@ -15,7 +15,8 @@ Gitignored until you build. This repo does not ship dumps, certs, or tickets.
 | `title.list` | Combined IDs |
 | `sys_prod.xml` | **WIS-001** / **FW** (region/serial stay retail) — do not Submit to WiiUIdent |
 | `system.xml` | Home Menu coldboot + kiosk policy fields (built; **not** FTP'd unless you answer **Y**) |
-| `system.xml.kioskboot` / `.kioskmenu` | Optional coldboot variants (uploaded, not active until swap) |
+| `system.xml.kioskboot` | Coldboot → native SCT (`swap_coldboot_ftp.ps1 -Mode sct`) |
+| `system.xml.kioskmenu` | Coldboot → Kiosk Menu (`-Mode kioskmenu`; trap risk) |
 
 **`apply_mutant_slc_ftp.ps1`** always uploads certs, title.list, sys_prod, and additive tickets. It then asks **Y/N** to upload `system.xml` (**default N** — could cause instability). Pass **`-ApplySystemXml`** to upload without the prompt. **`-FullKioskPolicy`** also uploads eco/prefs.
 

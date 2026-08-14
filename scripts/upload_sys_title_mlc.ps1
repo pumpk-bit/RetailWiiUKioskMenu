@@ -41,11 +41,11 @@ try {
     foreach ($tid in $TitleIds) {
         $localRoot = Join-Path $source $tid.ToLowerInvariant()
         if (-not (Test-Path -LiteralPath $localRoot)) {
-            if ($tid -eq $cfg.NativeSctTitleId.ToLowerInvariant()) {
+            if ($tid.ToLowerInvariant() -eq $cfg.NativeSctTitleId.ToLowerInvariant()) {
                 throw @"
 Missing native SCT folder: $localRoot
 
-Native SCT (1f700500) is required to launch Kiosk Menu unless retail SCT (13374454) is already installed via WUP Installer GX.
+Native SCT (1f700500) is required to launch Kiosk Menu from Home unless retail/homebrew SCT (13374454) is already installed via WUP Installer GX.
 
 Fix: re-extract native SCT from kiosk MLC, or install retail SCT on the console, or upload Kiosk Menu only:
   .\scripts\upload_sys_title_mlc.ps1 -TitleIds @('$($cfg.KioskMenuTitleId)')
@@ -123,7 +123,9 @@ Fix: re-extract native SCT from kiosk MLC, or install retail SCT on the console,
         Upload-TitleTree -TitleId $tid.ToLowerInvariant()
     }
 
-    Write-RwkmLog 'Next: Home Menu -> System Config Tool -> Kiosk Menu. Do not change coldboot until that works.'
+    Write-RwkmLog 'Next: Home Menu -> System Config Tool -> Kiosk Menu.'
+    Write-RwkmLog 'SCT: native 1f700500 (this upload) OR retail/homebrew 13374454 (WUP Installer GX).'
+    Write-RwkmLog 'Do not change coldboot until that works. See README: Default boot, stub titles.'
     Stop-RwkmSession -ExitCode 0
 } catch {
     Write-RwkmLog "ERROR: $($_.Exception.Message)"

@@ -84,6 +84,9 @@ def scan(path: Path) -> None:
         return
     usable = [s for s in supers if s["generation"] < ISFSHAX_GEN]
     usable.sort(key=lambda s: s["generation"], reverse=True)
+    if not usable:
+        print("No usable (pre-ISFShax) superblocks found")
+        return
     print(f"Found {len(supers)} super slots; newest usable gen=0x{usable[0]['generation']:08X} idx={usable[0]['index']}")
     for s in usable[:5]:
         hit = find_path(data, s["fst_base"], TARGET)

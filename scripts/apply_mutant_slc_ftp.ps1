@@ -131,6 +131,20 @@ $(if ($mode -eq 'SysNand') { 'Confirm you booted WITHOUT rednand.ini so this is 
             $uploaded++
         }
         Write-RwkmLog "  uploaded=$uploaded skipped=$skipped"
+        $criticalSkipped = @(
+            'sys/0001/0000000b.tik'
+            'sys/0003/00000002.tik'
+        )
+        $skippedPath = Join-Path (Split-Path -Parent $planPath) 'tickets_skipped.txt'
+        if (Test-Path -LiteralPath $skippedPath) {
+            $skippedRels = Get-Content -LiteralPath $skippedPath -Encoding UTF8
+            foreach ($crit in $criticalSkipped) {
+                if ($skippedRels -contains $crit) {
+                    Write-RwkmLog "  WARN: live already has $crit (retail bytes?) - Kiosk Menu / SCT may fail to launch"
+                    Write-RwkmLog '  Force-upload from overlay\mutant\slc or kiosk extract - see README Cannot launch'
+                }
+            }
+        }
     } else {
         Write-RwkmLog "  No ticket plan at $planPath - uploading all mutant tickets not on live..."
         $tikRoot = Join-Path $mutant 'sys\rights\ticket'
