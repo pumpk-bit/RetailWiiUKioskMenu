@@ -15,7 +15,6 @@ Native kiosk SCT (`1f700500`) does **not** appear as a Home tile. Open it via co
 | `<…>` | Value you can change (region, language, on/off, …) |
 | `[…]` | On-screen button / action (e.g. `[Erase]`, `[Reset to default]`) |
 | `>>` | Opens another screen — linked to that section |
-| Labels | Kept as on the console where known (**Other Setting**, **Allow** / **Not Allow**, …) |
 
 Header line (example):
 
@@ -35,8 +34,6 @@ System Config Tool ver.X.XX.X		Sys X.X.X : WUP : OS [NAND]
 | Language | `<Language>` |
 | Country | `<Country>` |
 
-Then a separator bar (same style as in the menu), then the entries below.
-
 ---
 
 ## Main menu
@@ -51,14 +48,14 @@ Then a separator bar (same style as in the menu), then the entries below.
 - [Wii Remote and Sensor Bar >>](#wii-remote-and-sensor-bar)
 - [Network Setting >>](#network-setting)
 - [Parental Control Setting >>](#parental-control-setting)
-- [Spot Pass Setting >>](#spot-pass-settings)
+- [Spot Pass Setting >>](#spot-pass-setting)
 - [Eula >>](#eula)
-- [Other Settings >>](#other-settings) — on-screen may say **Other Setting**
+- [Other Settings >>](#other-settings) — 
 
 ### Diagnostics / info
 
 - [Boot Configuration >>](#boot-configuration)
-- [Test Settings >>](#test-settings) — on-screen may say **Test Setting**
+- [Test Settings >>](#test-setting) — 
 - [System Titles Viewer >>](#system-titles-viewer)
 - [System Log Viewer >>](#system-log-viewer)
 - [Crash Logs Viewer >>](#crash-log-viewer)
@@ -339,9 +336,7 @@ EULA Version `XX.XX`
 
 ---
 
-## Other Settings
-
-(On-screen name may read **Other Setting**.)
+## Other Setting
 
 | Setting | Options | Notes |
 |---------|---------|--------|
@@ -446,9 +441,7 @@ Sets the main menu title for the Wii U.
 
 ---
 
-## Test Settings
-
-(On-screen may say **Test Setting**.)
+## Test Setting
 
 | Setting | Options |
 |---------|---------|
