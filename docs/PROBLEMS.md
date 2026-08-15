@@ -189,7 +189,7 @@ Keep **retail Home Menu** as default unless you accept that trap. See [README �
 
 On **Exit Kiosk Settings**, if an SD card is inserted, Kiosk Menu shows **Remove the SD card** before the carousel / **Kiosk Show** path:
 
-![Exit Kiosk Settings — Remove the SD card](PNG/Kiosk/Settings/readme/RemoveTheSDCard.png)
+![Exit Kiosk Settings — Remove the SD card](PNG/Kiosk/Settings/RemoveTheSDCard.png)
 
 On **redNAND**, licenses live on the **SD** (redSLC). Pulling the card while the console is running is like yanking the system drive out of a PC — expect a crash, freeze, or a dead mutant until you reboot with the card back in.
 
