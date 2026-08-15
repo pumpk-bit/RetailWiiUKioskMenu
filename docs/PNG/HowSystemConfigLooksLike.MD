@@ -50,12 +50,12 @@ System Config Tool ver.X.XX.X		Sys X.X.X : WUP : OS [NAND]
 - [Parental Control Setting >>](#parental-control-setting)
 - [Spot Pass Setting >>](#spot-pass-setting)
 - [Eula >>](#eula)
-- [Other Settings >>](#other-settings) — 
+- [Other Setting >>](#other-setting) 
 
 ### Diagnostics / info
 
 - [Boot Configuration >>](#boot-configuration)
-- [Test Settings >>](#test-setting) — 
+- [Test Setting >>](#test-setting) 
 - [System Titles Viewer >>](#system-titles-viewer)
 - [System Log Viewer >>](#system-log-viewer)
 - [Crash Logs Viewer >>](#crash-log-viewer)
