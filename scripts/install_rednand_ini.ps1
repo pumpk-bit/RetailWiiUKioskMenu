@@ -80,8 +80,19 @@ Fix:
     }
     if (-not (Test-Path -LiteralPath $src)) { throw "Missing ini template: $src" }
 
-    $diskNum = Get-RwkmSdDiskNumber -Config $cfg
-    Test-RwkmRedNandLayout -DiskNum $diskNum -Config $cfg -Force:$Force | Out-Null
+    # Layout check needs Admin (raw PhysicalDrive). Copying rednand.ini to FAT does not.
+    try {
+        $diskNum = Get-RwkmSdDiskNumber -Config $cfg
+        Test-RwkmRedNandLayout -DiskNum $diskNum -Config $cfg -Force:$Force | Out-Null
+    } catch {
+        $msg = $_.Exception.Message
+        if ($msg -match 'Access .+ is denied|AccessDenied|UnauthorizedAccess') {
+            Write-RwkmLog "WARN: SD MBR layout check skipped (need Administrator for PhysicalDrive). $($msg)"
+            Write-RwkmLog 'Continuing: only writing rednand.ini on the FAT \minute\ folder.'
+        } else {
+            throw
+        }
+    }
 
     $iniDesc = switch ($mode) {
         'Hybrid' {
