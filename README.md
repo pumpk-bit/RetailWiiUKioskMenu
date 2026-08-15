@@ -19,6 +19,8 @@ Same mutant scripts on both paths. Launch: **Home → System Config Tool (SCT) �
 
 Store kiosks ran the **retail Wii U system**. **Kiosk Menu** is an app (`1fa81000`) opened from **SCT**, plus extra SLC tickets and demo titles on MLC. This project does **not** replace the OS with kiosk firmware.
 
+This repo only documents a small, tested set: **Kiosk Menu**, **native SCT**, launch tickets, and optional **demos**. Unless you know what you are doing and are willing to risk a full **MLC and SLC** erase/rebuild, **do not** try to port other kiosk system apps (Home Button Menu / `00050030` applets, error UI, browser builds, and similar). Same title ID as retail does **not** mean a drop-in swap — a bad replace can hard-brick with **160-0103** and leave FTP unreachable.
+
 Keep **retail Home Menu** as default boot so FTP still works. See [Default boot](#default-boot-optional).
 
 What it looks like on the GamePad (category pick → demo carousel). Full-size originals live under `docs/PNG/Kiosk/Menu/`.
