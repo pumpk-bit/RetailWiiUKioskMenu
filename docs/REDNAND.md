@@ -1,6 +1,8 @@
 # redNAND path
 
-Licenses on the **SD** (redSLC). Kiosk Menu on **sys MLC** (Hybrid) or **red MLC** (Full). **Keep the SD inserted** while Kiosk Menu runs — pulling the card crashes or drops the mutant licenses on redSLC.
+Licenses on the **SD** (redSLC). Kiosk Menu on **sys MLC** (Hybrid) or **red MLC** (Full). **Keep the SD inserted** while Kiosk Menu / settings run — pulling the card crashes or drops the mutant licenses on redSLC.
+
+**Warning:** Exit Kiosk Settings can show **Remove the SD card** before the show menu. On redNAND that is unsafe — details: [PROBLEMS.md — Remove the SD card](PROBLEMS.md#exit-kiosk-settings-remove-the-sd-card-rednand).
 
 **Hybrid note:** redSLC lives on the SD; your retail games stay on **internal sys MLC**. Some kiosk settings flows assume a full kiosk NAND layout — if you need Kiosk Menu without the SD-in/out quirks of redNAND, prove the mutant here first, then move to [SYSNAND.md](SYSNAND.md).
 
@@ -11,7 +13,13 @@ Licenses on the **SD** (redSLC). Kiosk Menu on **sys MLC** (Hybrid) or **red MLC
 ## Before you start
 
 1. ISFShax + minute working; Aroma OK for FTP
-2. SD card — minute **Format redNAND** (backs up the card first):
+
+   ![minute Main menu](PNG/Minute/Minute.png)
+
+2. SD card — minute **Backup and Restore** → **Format redNAND** (backs up the card first):
+
+   ![Format redNAND in Backup and Restore](PNG/Minute/HowToFormatRedNANDSD.png)
+
    - **Hybrid:** **32 GB+** is usually enough (redSLC + minute FAT; sys MLC stays on console)
    - **FullRedNand:** **64 GB+** recommended (red SLC **and** red MLC on SD — size depends on your MLC dump)
 3. Retail + kiosk dumps extracted on PC:
@@ -32,7 +40,11 @@ Shared concepts (SCT, coldboot, demos): [README](../README.md). Problems / undo:
 
 ### Dump
 
-minute → backup → **SLC.RAW** on the FAT partition.
+In minute → **Backup and Restore**, dump at least **SEEPROM & OTP**, **SLC.RAW**, and **SLCCMPT.RAW** (store offline):
+
+![What to dump: SEEPROM & OTP, SLC.RAW, SLCCMPT.RAW](PNG/Minute/WhatNeedsToBeDumpedOnYourConsole.png)
+
+Full Backup and Restore list (Format redNAND, Restore, Erase MLC, …):
 
 ### Strip + validate (PC)
 
@@ -78,9 +90,12 @@ Output: `overlay\mutant\slc\` — merged certs/tickets, **WIS-001** / **FW** ide
 | Hybrid | `rednand.hybrid.ini` — `mlc=false` (sys MLC) |
 | FullRedNand | `rednand.full.ini` — `mlc=true` (red MLC on SD) |
 
-Boot with minute: **Patch (SD)** → **boot IOS (redNAND)**. Wait for Home Menu, then enable FTP if needed.
+Boot with minute: **Patch (sd) and boot IOS redNAND**. Wait for Home Menu, then enable FTP if needed:
+
+![Boot redNAND from minute](PNG/Minute/HowToBootRedNAND.png)
 
 Reboot with the redNAND SD **inserted** so FTP `storage_slc` / `storage_mlc` match your `DeploymentMode`.
+
 
 ### If redNAND does not boot
 
@@ -145,8 +160,20 @@ More demos: [README — Adding demos](../README.md#adding-demos). Launch / grid 
 
 **After first Kiosk Menu use:** idle reboot on Home (~2 min) is common. In **Kiosk Settings**, set **No-Input Reset → Off**. If it still reboots when idle: `.\scripts\restore_im_cfg_ftp.ps1` — [PROBLEMS.md — Idle reboot](PROBLEMS.md#idle-reboot-after-kiosk-menu--demos).
 
+Menu map: [HowKioskSettingsLookLike.MD](PNG/HowKioskSettingsLookLike.MD).
+
+---
+
+## You made it
+
+If you reach **Kiosk Settings** after Home → SCT → Kiosk Menu, the mutant + MLC path worked:
+
+![Kiosk Settings main screen](PNG/Kiosk/Settings/readme/KioskSettingsMain.jpg)
+
+Remember: on redNAND, **do not** pull the SD when Exit asks — [PROBLEMS.md](PROBLEMS.md#exit-kiosk-settings-remove-the-sd-card-rednand).
+
 ---
 
 ## Idle reboots / recovery
 
-Idle reboot, *Cannot launch*, demo grid, coldboot trap, full undo: **[PROBLEMS.md](PROBLEMS.md)**.
+Idle reboot, *Cannot launch*, demo grid, coldboot trap, SD remove trap, full undo: **[PROBLEMS.md](PROBLEMS.md)**.

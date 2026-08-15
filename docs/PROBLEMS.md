@@ -11,6 +11,7 @@ Scripts log under `logs\`. Read the red **ERROR:** line first. FTP needs **Home 
 | Problem | Jump |
 |---------|------|
 | Script / FTP / SD errors | [PC side](#pc-side) |
+| **NAND Extractor** won't take my SLC dump | [NAND Extractor](#nand-extractor-doesnt-take-my-slc-dump) |
 | **Title not appearing** in Kiosk Menu | [Title not appearing](#my-title-isnt-appearing) |
 | **Demo does not launch** (black screen / crash / error) | [Demo does not launch](#my-kiosk-demo-doesnt-launch-when-loaded) |
 | *Cannot launch this title* (SCT or Kiosk Menu app) | [Launch tickets skipped](#cannot-launch-this-title-sct-or-kiosk-menu) |
@@ -19,8 +20,11 @@ Scripts log under `logs\`. Read the red **ERROR:** line first. FTP needs **Home 
 | Idle reboot after kiosk / demos | [Idle reboot](#idle-reboot-after-kiosk-menu--demos) |
 | Title hard-crashes (Home and Kiosk) | [Hard crash](#title-hard-crashes-home-and-kiosk) |
 | Stuck in Kiosk Menu (no Home / FTP) | [Coldboot trap](#stuck-in-kiosk-menu-coldboot) |
+| **Remove the SD card** (Exit Kiosk Settings / redNAND) | [SD remove trap](#exit-kiosk-settings-remove-the-sd-card-rednand) |
 | Soft-brick / bad SLC | [Recovery](#recovery-reflash) |
 | Undo kiosk / go back to retail | [Reverse](#how-to-reverse-this) |
+| Aroma / Discovery plugins in Kiosk Menu | [Plugins](#aroma--discovery-plugins-in-kiosk-menu) |
+| Screenshot index | [Screenshots](#screenshots) |
 
 ---
 
@@ -29,6 +33,20 @@ Scripts log under `logs\`. Read the red **ERROR:** line first. FTP needs **Home 
 - **FTP fails:** Home Menu loaded (plugins start from Home), FTPiiU IP matches `config\config.ps1`, same LAN, `DeploymentMode` matches boot (redNAND SD vs sysNAND without `rednand.ini`).
 - **SD flash errors:** the letter in This PC must have `\minute\`. Re-run `setup_config.ps1` or edit `SdDriveLetter`.
 - **redNAND will not boot:** [REDNAND.md](REDNAND.md#if-rednand-does-not-boot) — Hybrid vs FullRedNand checks.
+- **NAND Extractor won't open the dump:** [below](#nand-extractor-doesnt-take-my-slc-dump).
+- **Plugins inside Kiosk Menu:** [below](#aroma--discovery-plugins-in-kiosk-menu).
+
+---
+
+## NAND Extractor doesn't take my SLC dump
+
+[NAND Extractor](https://github.com/koolkdev/wiiu-nandextract) needs a matching key file next to the image.
+
+1. Put **`otp.bin`** in the **same folder** as the SLC dump.
+2. The dump must be named **`slc.bin`**, not `SLC.RAW` / `SLC.raw` — you can **safely rename** it.
+3. **`otp.bin` and `slc.bin` must be from the same console.** Mixing OTP from one Wii U with an SLC from another will fail.
+
+Minute dumps as `SLC.RAW`; renaming to `slc.bin` for the extractor is normal.
 
 ---
 
@@ -53,7 +71,9 @@ The tile is there, but starting it fails (error, black screen, crash, or instant
 4. **Region** matches the demo (North/Latin America for USA Cat-I). See [Region](#region-and-adding-demos-from-another-region).
 5. If **Home Menu** plays it but Kiosk Menu does not → [title.list](#demos-launch-on-home-menu-but-not-from-kiosk-menu).
 6. If it **hard-crashes from Home too** → [Hard crash](#title-hard-crashes-home-and-kiosk) (not a missing ticket).
-7. Do **not** launch stubs from Home or SCT.
+7. Do **not** launch stubs from Home or SCT. On Home they often look like **DUMMY** / **Non Playable Demo**:
+
+   ![Stub tiles on Home Menu](PNG/Kiosk/KioskTitlesAndNonStubs.png)
 
 ---
 
@@ -165,20 +185,47 @@ Keep **retail Home Menu** as default unless you accept that trap. See [README �
 
 ---
 
+## Exit Kiosk Settings: Remove the SD card (redNAND)
+
+On **Exit Kiosk Settings**, if an SD card is inserted, Kiosk Menu shows **Remove the SD card** before the carousel / **Kiosk Show** path:
+
+![Exit Kiosk Settings — Remove the SD card](PNG/Kiosk/Settings/readme/RemoveTheSDCard.png)
+
+On **redNAND**, licenses live on the **SD** (redSLC). Pulling the card while the console is running is like yanking the system drive out of a PC — expect a crash, freeze, or a dead mutant until you reboot with the card back in.
+
+| Path | What to do |
+|------|------------|
+| **redNAND (Hybrid / Full)** | **Do not** remove the SD to “continue.” Stay in settings only as needed (**No-Input Reset → Off**, Region, …), then leave via Home / reboot **with the SD still in**. Use Home → SCT → Kiosk Menu for day-to-day launch. |
+| **sysNAND** | After a good apply the SD is optional. Removing it at this prompt is normal if you want the stock Exit → Kiosk Show flow. |
+
+Full redNAND path: [REDNAND.md](REDNAND.md). Prefer [SYSNAND.md](SYSNAND.md) if you need kiosk without living on an SD.
+
+---
+
 ## Recovery (reflash)
 
 | Problem | redNAND | sysNAND |
 |---------|---------|---------|
 | Bad / experimental SLC | Fresh SLC.RAW → strip → validate → flash SD partition → re-apply mutant | minute restore from offline dump |
-| Pull SD while kiosk runs | Crash — licenses live on redSLC; keep the card in | n/a |
+| Pull SD while kiosk runs / Exit asks to remove SD | [SD remove trap](#exit-kiosk-settings-remove-the-sd-card-rednand) — keep card in on redNAND | n/a (SD optional) |
 | Broken sys title on MLC | Delete/replace the uploaded folder | Same |
 | In SCT, **Boot title** | Can brick redSLC — restore as above | Same risk on sys SLC |
+
+**Erase MLC / Delete scfm.img** (minute Backup and Restore) wipes console storage — only when a MLC rebuild guide tells you to, this erases the real MLC:
+
+![Erase MLC and Delete scfm.img in minute](PNG/Minute/HowToDeleteMLCWiiU.png)
+
+A guide on how to rebuild MLC (redNAND and real sys MLC): 
+
+[wafel_setup_mlc](https://github.com/StroopwafelCFW/wafel_setup_mlc)
+
 
 ---
 
 ## How to reverse this
 
 You can stop using Kiosk Menu without undoing everything, or strip the mutant off SLC.
+If weird bugs and crashes happen then you can reflash the SLC.
 
 ### Keep Home Menu, stop using kiosk (light)
 
@@ -198,3 +245,42 @@ Need Home Menu + FTP (not trapped in Kiosk Menu coldboot).
 3. Do **not** WiiUIdent **Submit System Data** while `model_number` is still **WIS-001** / `code_id` **FW**. After a clean retail SLC restore, identity should be retail again.
 
 Saves / Miis: first Kiosk Menu use can create user **Sarah** and **replace the current Mii + name** on the active account. **Back up** before the first launch. A **new** Wii U account you create afterward is left alone. Game saves were not fully tested (MLC was wiped in the lab install).
+
+![User Settings — Sarah set as default user](PNG/Kiosk/DefaultUserBeingSarah.png)
+
+---
+
+## Aroma / Discovery plugins in Kiosk Menu
+
+Some Aroma / Discovery plugins **may** work while **Kiosk Menu** is running. Lab shots in [README](../README.md#kiosk-menu-not-kiosk-os) were taken that way.
+
+That is **not** a guarantee. Plugins can fail, crash, or simply not load for a given title or setup. Treat anything that works as a bonus.
+
+**Do not** rely on FTP or other plugins *inside* Kiosk Menu to fix a bad SLC write. Keep **Home Menu** coldboot for admin work; open FTPiiU from Home.
+
+---
+
+## Screenshots
+
+| Topic | Image |
+|-------|--------|
+| Retail SCT on Home | [RetailSystemConfigTool.png](PNG/RetailSystemConfigTool.png) |
+| SCT menu map | [HowSystemConfigLooksLike.MD](PNG/HowSystemConfigLooksLike.MD) |
+| Kiosk Settings menu map | [HowKioskSettingsLookLike.MD](PNG/HowKioskSettingsLookLike.MD) |
+| Kiosk Settings main (success) | [KioskSettingsMain.png](PNG/Kiosk/Settings/KioskSettingsMain.png) |
+| Set Menu Options | [KioskSettingsMenu.png](PNG/Kiosk/Settings/KioskSettingsMenu.png) |
+| Exit → Remove the SD card | [RemoveTheSDCard.png](PNG/Kiosk/Settings/RemoveTheSDCard.png) |
+| Kiosk Menu categories (DRC) | [SelectionMenuInDRC.png](PNG/Kiosk/Menu/SelectionMenuInDRC.png) |
+| Kiosk Menu demo carousel (DRC) | [Mario3DWorldDemoDRC.png](PNG/Kiosk/Menu/Mario3DWorldDemoDRC.png) · [MarioTennisDemoDRC.png](PNG/Kiosk/Menu/MarioTennisDemoDRC.png) |
+| Kiosk Menu title page / video (TV) | [Mario3DWorldDemoTV.png](PNG/Kiosk/Menu/Mario3DWorldDemoTV.png) · [MarioTennisDemoTV.png](PNG/Kiosk/Menu/MarioTennisDemoTV.png) |
+| Wii U logo splash (TV) | [KiosWiiULogoTV.png](PNG/Kiosk/Menu/KiosWiiULogoTV.png) |
+| Sarah / default user | [DefaultUserBeingSarah.png](PNG/Kiosk/DefaultUserBeingSarah.png) |
+| Stub / Non Playable Demo tiles | [KioskTitlesAndNonStubs.png](PNG/Kiosk/KioskTitlesAndNonStubs.png) |
+| minute Main menu | [Minute.png](PNG/Minute/Minute.png) |
+| Boot redNAND | [HowToBootRedNAND.png](PNG/Minute/HowToBootRedNAND.png) |
+| Boot sysNAND | [HowToBootNativeWiiU.png](PNG/Minute/HowToBootNativeWiiU.png) |
+| Dump OTP / SLC / SLCCMPT | [WhatNeedsToBeDumpedOnYourConsole.png](PNG/Minute/WhatNeedsToBeDumpedOnYourConsole.png) |
+| Backup and Restore | [DumpAndRestore.png](PNG/Minute/DumpAndRestore.png) |
+| Format redNAND | [HowToFormatRedNANDSD.png](PNG/Minute/HowToFormatRedNANDSD.png) |
+| Patch (sd) → boot IOS (slc) | [IfMinuteIsntOnSLC.png](PNG/Minute/IfMinuteIsntOnSLC.png) |
+| Erase MLC / Delete scfm.img | [HowToDeleteMLCWiiU.png](PNG/Minute/HowToDeleteMLCWiiU.png) — **destructive**; only when a guide tells you to |
