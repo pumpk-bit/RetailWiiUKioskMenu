@@ -69,7 +69,7 @@ try {
             -Description 'Overwrite previous tickets_to_upload.json' -Level Normal -Force:$Force
     }
 
-    $plan | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath $out -Encoding UTF8
+    Write-RwkmJsonArrayFile -Path $out -Items $plan
     $skipped | Set-Content -LiteralPath (Join-Path $outDir 'tickets_skipped.txt') -Encoding UTF8
 
     Write-RwkmLog "New tickets to upload: $($plan.Count)"

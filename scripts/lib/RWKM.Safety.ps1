@@ -216,3 +216,54 @@ function Confirm-RwkmSystemXmlPolicy {
     param([switch]$Force)
     return Confirm-Rwkm -Level Warning -Prompt (Get-RwkmSystemXmlPolicyWarning) -Force:$Force
 }
+
+function Read-RwkmJsonArrayFile {
+    # Return List[object] of JSON array elements.
+    # Avoids PS 5.1 pitfalls: @(ConvertFrom-Json) wrapping, and single-element return unwrap.
+    param([Parameter(Mandatory = $true)][string]$Path)
+    if (-not (Test-Path -LiteralPath $Path)) {
+        throw "JSON file not found: $Path"
+    }
+    $list = New-Object 'System.Collections.Generic.List[object]'
+    $raw = Get-Content -LiteralPath $Path -Raw
+    if ([string]::IsNullOrWhiteSpace($raw)) {
+        return $list
+    }
+    $parsed = ConvertFrom-Json -InputObject $raw
+    if ($null -eq $parsed) {
+        return $list
+    }
+    if ($parsed -is [System.Array]) {
+        foreach ($item in $parsed) {
+            [void]$list.Add($item)
+        }
+    } else {
+        [void]$list.Add($parsed)
+    }
+    # Unary comma: keep List intact when Count -eq 1 (PS otherwise unwraps to the item).
+    return , $list
+}
+
+function Write-RwkmJsonArrayFile {
+    # Always write a JSON array (including [] and single-element [{...}]).
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [AllowNull()][object]$Items
+    )
+    $dir = Split-Path -Parent $Path
+    if ($dir) { New-Item -ItemType Directory -Force -Path $dir | Out-Null }
+    $payload = New-Object 'System.Collections.Generic.List[object]'
+    if ($null -ne $Items) {
+        foreach ($item in @($Items)) {
+            # Guard against accidental nested array from @($object[])
+            if ($item -is [System.Array] -and -not ($item -is [string])) {
+                foreach ($inner in $item) { [void]$payload.Add($inner) }
+            } else {
+                [void]$payload.Add($item)
+            }
+        }
+    }
+    $json = ConvertTo-Json -InputObject @($payload.ToArray()) -Depth 6
+    Set-Content -LiteralPath $Path -Value $json -Encoding UTF8
+}
+

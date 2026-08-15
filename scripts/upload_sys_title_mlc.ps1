@@ -97,13 +97,19 @@ Fix: re-extract native SCT from kiosk MLC, or install retail SCT on the console,
     function Upload-TitleTree {
         param([string]$TitleId)
         $localRoot = Join-Path $source $TitleId
+        if (-not (Test-Path -LiteralPath $localRoot)) {
+            throw "Missing source folder: $localRoot"
+        }
+        # Resolve .\ in config paths — raw Substring on an unresolved root eats the first path char
+        # (code->ode, content->ontent, meta->eta) and uploads to the wrong MLC folders.
+        $localRoot = (Resolve-Path -LiteralPath $localRoot).Path
         $files = Get-ChildItem $localRoot -Recurse -File
         $fileMb = [math]::Round(($files | Measure-Object Length -Sum).Sum / 1MB, 2)
         Write-RwkmLog ('Uploading {0} ({1} files, {2} MB)...' -f $TitleId, $files.Count, $fileMb)
         $i = 0
         foreach ($file in $files) {
             $i++
-            $rel = $file.FullName.Substring($localRoot.Length).TrimStart('\').Replace('\', '/')
+            $rel = Get-RwkmRelativeUnixPath -Root $localRoot -FullPath $file.FullName
             $remote = "$baseUrl/$TitleId/$rel"
             Write-RwkmLog "  [$i/$($files.Count)] $rel"
             if ($WhatIf) {
