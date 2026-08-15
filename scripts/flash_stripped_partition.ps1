@@ -4,6 +4,7 @@
 # Always resolves the disk from SdDriveLetter (never guesses E: or the first USB disk).
 # Always runs redNAND layout checks before writing.
 
+[CmdletBinding(DefaultParameterSetName = 'Config')]
 param(
     [Parameter(ParameterSetName = 'Explicit')]
     [string]$StrippedPath,

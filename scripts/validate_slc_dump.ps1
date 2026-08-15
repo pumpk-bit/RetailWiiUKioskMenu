@@ -4,6 +4,7 @@
 #
 # Needs Python 3 (py -3, python, or python3 on PATH).
 
+[CmdletBinding(DefaultParameterSetName = 'Config')]
 param(
     [Parameter(ParameterSetName = 'Explicit')][string]$InputPath,
     [string]$StrippedPath = '',

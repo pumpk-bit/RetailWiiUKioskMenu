@@ -30,25 +30,40 @@ try {
     $cred = Get-RwkmFtpCredential -Config $cfg
     $baseUrl = "$(Get-RwkmFtpBase -Config $cfg -Mount mlc)/sys/title/00050010"
 
+    # Defaults match config.example.ps1 / setup_config.ps1 (avoid null.ToLowerInvariant crashes).
+    $kioskMenuId = if ($cfg.ContainsKey('KioskMenuTitleId') -and $cfg.KioskMenuTitleId) {
+        $cfg.KioskMenuTitleId.ToString().ToLowerInvariant()
+    } else { '1fa81000' }
+    $nativeSctId = if ($cfg.ContainsKey('NativeSctTitleId') -and $cfg.NativeSctTitleId) {
+        $cfg.NativeSctTitleId.ToString().ToLowerInvariant()
+    } else { '1f700500' }
+    $sugarBootId = if ($cfg.ContainsKey('SugarBootTitleId') -and $cfg.SugarBootTitleId) {
+        $cfg.SugarBootTitleId.ToString().ToLowerInvariant()
+    } else { '1fa83200' }
+
     if (-not $TitleIds -or $TitleIds.Count -eq 0) {
         # Native SCT is required to launch Kiosk Menu from Home on retail hybrid setups.
-        $TitleIds = @($cfg.KioskMenuTitleId, $cfg.NativeSctTitleId)
-        if ($IncludeSugarBoot) { $TitleIds += $cfg.SugarBootTitleId }
+        $TitleIds = @($kioskMenuId, $nativeSctId)
+        if ($IncludeSugarBoot) { $TitleIds += $sugarBootId }
     }
 
     $totalFiles = 0
     $totalBytes = 0L
     foreach ($tid in $TitleIds) {
-        $localRoot = Join-Path $source $tid.ToLowerInvariant()
+        if ([string]::IsNullOrWhiteSpace($tid)) {
+            throw 'TitleIds contains an empty entry. Pass real 8-char IDs or set KioskMenuTitleId / NativeSctTitleId in config.ps1.'
+        }
+        $tidNorm = $tid.ToString().ToLowerInvariant()
+        $localRoot = Join-Path $source $tidNorm
         if (-not (Test-Path -LiteralPath $localRoot)) {
-            if ($tid.ToLowerInvariant() -eq $cfg.NativeSctTitleId.ToLowerInvariant()) {
+            if ($tidNorm -eq $nativeSctId) {
                 throw @"
 Missing native SCT folder: $localRoot
 
 Native SCT (1f700500) is required to launch Kiosk Menu from Home unless retail/homebrew SCT (13374454) is already installed via WUP Installer GX.
 
 Fix: re-extract native SCT from kiosk MLC, or install retail SCT on the console, or upload Kiosk Menu only:
-  .\scripts\upload_sys_title_mlc.ps1 -TitleIds @('$($cfg.KioskMenuTitleId)')
+  .\scripts\upload_sys_title_mlc.ps1 -TitleIds @('$kioskMenuId')
 "@
             }
             throw "Missing source folder: $localRoot - set KioskMlcSysTitleRoot in config.ps1"
