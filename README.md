@@ -22,7 +22,7 @@ Run the **CAT-I Kiosk Menu** on a retail Wii U. This is **Kiosk Menu**, not a fu
 |-------|----------------|
 | **[Human tutorial](docs/HUMAN/README.MD)** | Want step-by-step FTP / hex / PowerShell by hand. Made by me. |
 | **[AI / scripts tutorial](docs/AI/README.md)** | Prefer PowerShell scripts (`build_mutant_slc`, FTP apply, demos). Made with the help of Cursor AI. |
-| **[Custom video demo](docs/HOWTOMAKECUSTOMDEMO.MD)** | Reskin a video stub (your MP4, `KioskMeta.xml` text, box art). |
+| **[Custom video demo](docs/HOWTOMAKECUSTOMDEMO.MD)** | Reskin a video stub (your MP4, `KioskMeta.xml` text, box art). Made with the help of Cursor AI.|
 | **[Experimental](docs/AI/EXPERIMENTAL.MD)** | Kiosk Home Button Menu / system fonts (high risk, incomplete). |
 
 Both main paths need: **Aroma**, **FTPiiU**, **ISFShax + minute**, a **CAT-I dump**, and **SCT** (retail `13374454` on Home, or native `1f700500`).

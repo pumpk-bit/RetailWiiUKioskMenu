@@ -46,7 +46,6 @@ Where each field shows up on the TV (template labels):
 
 ### How the language blocks work
 
-
 Kiosk Menu shows different languages. Each **text field** is repeated once per language inside a `LanguageCell`.
 
 Think of it as:
@@ -70,7 +69,7 @@ Pattern (same for every text field):
 * `<Text>…</Text>` = the actual words on screen  
 * You can use **one** `<Text>` or **several** (each is roughly one line)
 
-For a USA-focused stub, **`US_English` alone is enough** to start. Add other `LanguageCell`s only if you want them.
+For a USA-focused stub, edit **`US_English`** and leave the other `LanguageCell`s alone. Don’t delete French/Spanish/Portuguese blocks — if the kiosk language isn’t English, those slots can go blank.
 
 Common language ids you’ll see: `US_English`, `US_French`, `US_Spanish`, `US_Portuguese`.
 
@@ -88,10 +87,11 @@ Also check near the top of the file (not language blocks):
 
 | Tag | Meaning |
 |-----|---------|
-| `MinPlayers` / `MaxPlayers` | Player count shown (e.g. 1 and 2) |
-| `controllerGame` | Controllers listed (repeat the tag per controller) |
+| `MinPlayers` / `MaxPlayers` | Player count. Also drives **Multiplayer** on the card (`Yes` when Max is greater than 1, otherwise `No`) |
+| `controllerGame` | Controllers listed (repeat the tag per controller / per remote slot) |
+| `distType` | Availability line under the controllers. USA stubs usually use `2` → “Available in retail or as download” |
 
-Known controller values: `DRC`, `Nunchuck`, `Wii_Remote`, `Balance_Board`, `URCC` (Pro).
+Known controller values: `DRC`, `Nunchuck`, `Wii_Remote`, `Classic`, `Balance_Board`, `URCC` (Pro), `Other`.
 
 ### Description limits
 
@@ -100,7 +100,7 @@ Known controller values: `DRC`, `Nunchuck`, `Wii_Remote`, `Balance_Board`, `URCC
 
 ### Example (English only)
 
-Template-style English blocks (same idea as a filled stub). Other languages in a real file can be left alone or deleted for a USA-only edit.
+Template-style English blocks (same idea as a filled stub). In a real file, change only the `US_English` cells; leave the other languages as they are.
 
 ```xml
 <demoTitle>
@@ -166,3 +166,12 @@ See:
 
 * Human: [ADDINGGAMES.MD](HUMAN/ADDINGGAMES.MD)  
 * Scripts: [NEWDEMOS.MD](AI/NEWDEMOS.MD)
+
+
+# AI usage
+
+Cursor was used to check spelling and fix a few in my text bugs. Mostly human documentation on how to add pictures and replace text.
+
+Cursor helped understand and recreate the right `.mp4` with ffmpeg since the Wii U won't accept modern versions.
+
+Cursor also helped explain `.xml` for new users.
