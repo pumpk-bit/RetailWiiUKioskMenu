@@ -1,205 +1,34 @@
 # Retail Wii U Kiosk Menu
 
-Tools to run **Kiosk Menu** on a retail Wii U. **No dumps or tickets** in this repo.
+Run the **CAT-I Kiosk Menu** on a retail Wii U. This is **Kiosk Menu**, not a full kiosk OS — no custom Home Button Menu. You open it from **System Config Tool (SCT)** after merging kiosk licenses onto SLC and uploading the menu (and demos) to MLC.
 
-**Risk:** bad writes can soft-brick. Back up SD + NAND first. **PAL** tested; **USA** in scripts; **JPN** not supported yet. We cannot guarantee 100% stability.
-
-| Path | Guide |
-|------|--------|
-| **redNAND** (SD lab) | **[docs/REDNAND.md](docs/REDNAND.md)** |
-| **Real hardware** (sysNAND) | **[docs/SYSNAND.md](docs/SYSNAND.md)** |
-| **Problems, bugs, undo** | **[docs/PROBLEMS.md](docs/PROBLEMS.md)** |
-| **Screenshots** (minute / SCT / kiosk) | **[docs/PROBLEMS.md#screenshots](docs/PROBLEMS.md#screenshots)** · [SCT menu map](docs/PNG/HowSystemConfigLooksLike.MD) · [Kiosk Settings map](docs/PNG/HowKioskSettingsLookLike.MD) |
-
-Same mutant scripts on both paths. Launch: **Home → System Config Tool (SCT) → Kiosk Menu**.
-
----
-
-## Kiosk Menu, not "kiosk OS"
-
-Store kiosks ran the **retail Wii U system**. **Kiosk Menu** is an app (`1fa81000`) opened from **SCT**, plus extra SLC tickets and demo titles on MLC. This project does **not** replace the OS with kiosk firmware.
-
-This repo only documents a small, tested set: **Kiosk Menu**, **native SCT**, launch tickets, and optional **demos**. Unless you know what you are doing and are willing to risk a full **MLC and SLC** erase/rebuild, **do not** try to port other kiosk system apps (Home Button Menu / `00050030` applets, error UI, browser builds, and similar). Same title ID as retail does **not** mean a drop-in swap — a bad replace can hard-brick with **160-0103** and leave FTP unreachable.
-
-Keep **retail Home Menu** as default boot so FTP still works. See [Default boot](#default-boot-optional).
-
-What it looks like on the GamePad (category pick → demo carousel). Full-size originals live under `docs/PNG/Kiosk/Menu/`.
+**No dumps or tickets** in this repo. You supply your own CAT-I extract.
 
 <p>
-  <img src="docs/PNG/Kiosk/Menu/readme/SelectionMenuInDRC.jpg" alt="Kiosk Menu category screen on GamePad" width="480" />
-  <img src="docs/PNG/Kiosk/Menu/readme/Mario3DWorldDemoDRC.jpg" alt="Kiosk Menu demo carousel with Play Demo" width="480" />
+  <img src="docs/PNG/Kiosk/Menu/Mario3DWorldDemoTV.png" alt="Kiosk Menu on TV 3D World" />
+  <img src="docs/PNG/Kiosk/Menu/MarioTennisDemoTV.png" alt="Kiosk Menu on TV Tennis" />
 </p>
 
-**Aroma / Discovery plugins:** some plugins **may** also work while Kiosk Menu is open (these shots were taken that way). That is **not** guaranteed for every plugin or every setup — do **not** count on FTP or overlays inside Kiosk Menu for recovery. Prefer **Home Menu** for FTPiiU and admin work.
+## Warnings
 
----
+- Bad SLC/MLC writes can soft-brick. Back up **OTP / SLC / SLCCMPT** (and saves) first.
+- First Kiosk Menu use creates user **Sarah** over the main account.
+- Keep **retail Home Menu** as default boot so FTP still works. Coldbooting Kiosk Menu traps you (no Home → no FTP).
+- **Don’t** use WiiUIdent **Submit System Data** while identity is **WIS-001 / FW**.
 
-## You need
+## Choose a guide
 
-- **ISFShax + minute** ([setup](https://gbatemp.net/threads/how-to-set-up-isfshax.642258/)) — Aroma alone is not enough (FTP apps still fine)
-- **Windows 10/11** + PowerShell 5.1+ (Administrator for SD flash)
-- **curl.exe** on PATH (scripts call `curl.exe`, not the PowerShell alias)
-- **Python 3** — only for `validate_slc_dump.ps1` before flashing
-- Retail **and** kiosk dumps, extracted yourself:
-  - **SLC:** [NAND Extractor](https://github.com/koolkdev/wiiu-nandextract) — needs **otp.bin** from that NAND. Put the trees in `dumps\retail\` and `dumps\kiosk\` (read the text file in each folder).
-  - **Kiosk MLC** (Kiosk Menu / SCT / demos): [wfs-extract](https://github.com/koolkdev/wfs-tools). Default: `dumps\kiosk\Extracted\`. Or set `KioskMlcSysTitleRoot` to wherever you extracted.
-- FTP to the Wii U while **Home Menu** is up
-- **redNAND:** 32 GB+ SD (Hybrid) or 64 GB+ (FullRedNand)
-- **sysNAND:** fresh minute SLC backup before touching internal NAND
+| Guide | Best if you… |
+|-------|----------------|
+| **[Human tutorial](docs/HUMAN/README.MD)** | Want step-by-step FTP / hex / PowerShell by hand. Made by me. |
+| **[AI / scripts tutorial](docs/AI/README.md)** | Prefer PowerShell scripts (`build_mutant_slc`, FTP apply, demos). Made with the help of Cursor AI. |
 
-```powershell
-cd RetailWiiUKioskMenu
-.\scripts\setup_config.ps1
-```
+Both paths need: **Aroma**, **FTPiiU**, **ISFShax + minute**, a **CAT-I dump**, and **SCT** (retail `13374454` on Home, or native `1f700500`).
 
-Wizard: region, `DeploymentMode`, Wii U IP, SD letter (volume with `\minute\`). Dump paths default to `dumps\retail` and `dumps\kiosk`. Or copy `config\config.example.ps1` → `config\config.ps1`. Scripts **refuse** the example file automatically.
-
-Writes to the Wii U / SD ask **Y/N** (default **N**), log under `logs\`, pause on error. `-Force` skips confirms.
-
----
-
-## System Config Tool
-
-You need **one** SCT on MLC to open Kiosk Menu (unless coldboot is Kiosk Menu):
-
-| SCT | Title ID | How |
-|-----|----------|-----|
-| **Native (kiosk)** | `1f700500` | Default — `upload_sys_title_mlc.ps1`|
-| **Retail / homebrew** | `13374454` | WUP Installer GX |
-
-Retail SCT on Home Menu looks like this:
-
-![System Config Tool on Home Menu](docs/PNG/RetailSystemConfigTool.png)
-
-**If retail SCT is not on Home Menu:** either install **retail/homebrew** `13374454` with WUP Installer GX, **or** set coldboot to **native SCT** (`.\scripts\swap_coldboot_ftp.ps1 -Mode sct`) so you land in `1f700500` every boot. Native SCT is for the Title Launcher path below; it does not appear as a normal Home icon like retail SCT.
-
-**Launch Kiosk Menu from SCT:**
-
-1. Open System Config Tool  
-2. **Title Launcher** → **System NAND memory (mlc)**  
-3. Find **Kiosk Menu** → press **A**  
-4. Confirm **Title Type: Menu** before launching  
-
-Do **not** use SCT **Boot title** to make Kiosk Menu the default (brick risk). Use `swap_coldboot_ftp.ps1` only after Home → SCT → Kiosk Menu works.
-
-Full SCT menu map (every screen, what `<options>` mean): [docs/PNG/HowSystemConfigLooksLike.MD](docs/PNG/HowSystemConfigLooksLike.MD).
-
----
-
-## Default boot (optional)
-
-After **Home → SCT → Kiosk Menu** works, you may change power-on boot (`storage_slc/sys/config/system.xml`). Run `build_mutant_slc.ps1` first.
-
-| # | Boots into | Command |
-|---|------------|---------|
-| **1** | **Retail Home Menu** (recommended) | `.\scripts\swap_coldboot_ftp.ps1 -Mode home` |
-| **2** | Native SCT | `.\scripts\swap_coldboot_ftp.ps1 -Mode sct` |
-| **3** | Kiosk Menu | `.\scripts\swap_coldboot_ftp.ps1 -Mode kioskmenu` |
-
-Option 3: Home never loads → **FTP never starts** → PC undo will not work. Recovery = reflash SLC. Details: [PROBLEMS.md — coldboot trap](docs/PROBLEMS.md#stuck-in-kiosk-menu-coldboot).
-
----
-
-## Hard rules
-
-- **SCT on MLC** before launching Kiosk Menu from Home
-- **Home Menu** coldboot unless you accept the Kiosk Menu trap
-- **Do not** launch stub / `…ff` / `non_playable_demo.rpx` titles from Home or SCT ([stubs](#stubs))
-- Back up **saves and Miis** before first kiosk launch — Kiosk Menu will create user **Sarah** and replace the current account. A new account you add later is left alone. Details: [PROBLEMS.md](docs/PROBLEMS.md#how-to-reverse-this)
-
-  ![User Settings showing Sarah as default user](docs/PNG/Kiosk/DefaultUserBeingSarah.png)
-- Mutant identity **WIS-001** / **FW** — do **not** [WiiUIdent](https://github.com/GaryOderNichts/WiiUIdent) **Submit System Data**
-- Upload only **clean** MLC extracts. In SCT, avoid **Boot title**
-
----
-
-## Adding demos (same MLC)
-
-Three pieces on the console:
-
-| # | What | FTP path |
-|---|------|----------|
-| 1 | Ticket (`.tik`) | `storage_slc/sys/rights/ticket/…` |
-| 2 | Title ID in **`title.list`** | `storage_slc/sys/rights/sys/title.list` |
-| 3 | Title files | `storage_mlc/usr/title/00050002/<8-char-id>/` |
-
-**MLC folders are always your job** (WinSCP / FTP). Folder name on the console must be **only** the 8-character ID (`10117e00`), not `10117e00 - Super Mario U` or `0005000210117e00`. (Using New Super Mario Bros.U as an example only)
-
-1. Map dump folders → ticket paths (PC): `.\scripts\map_kiosk_demo_tickets.ps1`  
-   Looks in `dumps\kiosk\Extracted\usr\title\00050002` by default.  
-   Output: `backup\live_slc_pre_mutant\kiosk_demo_ticket_map.txt` (`playable` vs `stub`).
-2. Upload playable MLC folder (and stub sibling if the map has one).
-3. Patch SLC rights from the PC extract folder (suffix in the name is fine):
-
-```powershell
-.\scripts\patch_demo_rights_ftp.ps1 -Mode Add -DemoFolder 'C:\path\to\10117e00 - Super Mario U'
-```
-
-Bulk path: `build_mutant_slc.ps1 -Rebuild` then `plan_additive_tickets.ps1` / `apply_mutant_slc_ftp.ps1`.
-
-If Home plays a demo but Kiosk Menu does not: [PROBLEMS.md — title.list](docs/PROBLEMS.md#demos-launch-on-home-menu-but-not-from-kiosk-menu).
-
-## Removing demos
-
-Use FTP to delete the MLC folder, then remove the ticket and title.list entry from SLC:
-
-```powershell
-.\scripts\patch_demo_rights_ftp.ps1 -Mode Remove -DemoFolder 'C:\path\to\10117e00 - Super Mario U'
-```
-
-Reboot after removing demos files. 
-
-Note: You can remove the files manually (WinSCP / FTP) — the script only removes tickets and title.list entries.
-
-| # | What | FTP path |
-|---|------|----------|
-| 1 | Ticket (`.tik`) | `storage_slc/sys/rights/ticket/…` |
-| 2 | Title ID in **`title.list`** | `storage_slc/sys/rights/sys/title.list` |
-| 3 | Title files | `storage_mlc/usr/title/00050002/<8-char-id>/` |
-
-## Adding different region demos
-
-**Another region (e.g. USA demos on a PAL console):** FTP the demo onto MLC as above, run `patch_demo_rights_ftp.ps1 -Mode Add` with your extract folder, then in Kiosk Menu set **Region** to match. Labels are typically **North/Latin America**, **Japan**, **Europe/Australia/NZ** (wording can differ by kiosk version). Switching Region **hides** the other set; it does **not** delete them. Full write-up: [PROBLEMS.md — Region](docs/PROBLEMS.md#region-and-adding-demos-from-another-region).
-
-If Home plays a demo but Kiosk Menu does not: [PROBLEMS.md — title.list](docs/PROBLEMS.md#demos-launch-on-home-menu-but-not-from-kiosk-menu).
-
-### Stubs
-
-`stub` rows (`…FF`, `non_playable_demo.rpx`, or `KioskMeta.xml` pointing at another title) are **video tiles for Kiosk Menu**. Do **not** open them from Home or SCT. Copy stub MLC + ticket when pairing with a playable demo. Some titles are playable-only (e.g. New Super Mario Bros. U).
-
-On Home they often show as **DUMMY** / **Non Playable Demo** — leave them alone; launch the playable sibling instead:
-
-![Home Menu stub tiles labeled Non Playable Demo](docs/PNG/Kiosk/KioskTitlesAndNonStubs.png)
-
----
-
-## Scripts
-
-| Script | Role |
-|--------|------|
-| `setup_config.ps1` | IP + SD letter + region |
-| `strip_from_config.ps1` / `validate_slc_dump.ps1` / `flash_stripped_partition.ps1` | redNAND SD |
-| `build_mutant_slc.ps1` | Merge retail + kiosk licenses on PC |
-| `backup_slc_ftp.ps1` / `plan_additive_tickets.ps1` / `apply_mutant_slc_ftp.ps1` | Live SLC patch (`system.xml` default **N**; always overwrites Kiosk Menu / SCT tickets) |
-| `map_kiosk_demo_tickets.ps1` | Demo folder → `.tik` map (PC) |
-| `patch_demo_rights_ftp.ps1` | Add/remove demo `title.list` + `.tik` |
-| `upload_sys_title_mlc.ps1` | Kiosk Menu + native SCT → MLC |
-| `force_kiosk_launch_tickets_ftp.ps1` | Retry Kiosk Menu + native SCT tickets (if *Cannot launch* after an older apply) |
-| `swap_coldboot_ftp.ps1` | `-Mode home` / `sct` / `kioskmenu` |
-| `restore_im_cfg_ftp.ps1` | Idle reboot fix |
-| `set_sys_prod_region_ftp.ps1` | Optional region spoof |
-
-Mutant output: `overlay\mutant\slc\` ([overlay/README.md](overlay/README.md)).
-
-Something broken? **[docs/PROBLEMS.md](docs/PROBLEMS.md)** — launch tickets, idle reboot, reverse/undo.
-
----
+**Launch:** Home → System Config Tool → Title Launcher → **Kiosk Menu** (Type: Menu).
 
 ## Legal
 
-Kiosk NAND/title/SCT data is copyrighted. You obtain dumps yourself.
-
-- [ISFShax](https://isfsh.ax/) · [redNAND guide](https://gbatemp.net/threads/how-to-setup-rednand-to-fix-system-memory-error-160-0103-failing-emmc-without-soldering.642268/)
-- [wiiu-nandextract](https://github.com/koolkdev/wiiu-nandextract) · [wfs-tools](https://github.com/koolkdev/wfs-tools)
+Kiosk NAND/title/SCT data is copyrighted. Obtain dumps yourself.
 
 Thanks: [koolkdev](https://github.com/koolkdev), ISFShax / minute community, and Cursor AI ([cursor.com](https://cursor.com/)).

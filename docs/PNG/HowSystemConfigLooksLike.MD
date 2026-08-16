@@ -6,7 +6,7 @@ How **System Config Tool** (SCT) looks on-screen. Use this when launching **Kios
 
 ![System Config Tool tile on Wii U Home Menu](RetailSystemConfigTool.png)
 
-Native kiosk SCT (`1f700500`) does **not** appear as a Home tile. Open it via coldboot SCT, or use retail SCT from Home. Launch steps: [README — System Config Tool](../../README.md#system-config-tool).
+Native kiosk SCT (`1f700500`) does **not** appear as a Home tile. Open it via coldboot SCT, or use retail SCT from Home. Launch steps: [README — System Config Tool](../AI/README.md#system-config-tool).
 
 ### Conventions
 
@@ -93,7 +93,7 @@ Example row (Kiosk Menu):
 | Title ID | `<00050010_1fa81000>` |
 | … | … |
 
-> **This project:** pick **Kiosk Menu**, confirm **Title Type: Menu**, then launch. See [README — System Config Tool](../../README.md#system-config-tool).
+> **This project:** pick **Kiosk Menu**, confirm **Title Type: Menu**, then launch. See [README — System Config Tool](../AI/README.md).
 
 ---
 
@@ -304,8 +304,6 @@ Profiles:
 
 ## Spot Pass Settings
 
-(On-screen main-menu row may say **Spot Pass Setting**.)
-
 | Setting | Options |
 |---------|---------|
 | Spot Pass | `<Enable/Disable>` |
@@ -437,8 +435,7 @@ Sets the main menu title for the Wii U.
 | `<00050010_1f700500>` | System Config Tool |
 | `<00050010_10040200>` | Wii U Menu |
 
-> Do **not** change default boot to Kiosk Menu from SCT **Boot title** unless you accept losing Home/FTP. Prefer `swap_coldboot_ftp.ps1` only after Home → SCT → Kiosk Menu already works. See [PROBLEMS — coldboot trap](../PROBLEMS.md#stuck-in-kiosk-menu-coldboot).
-
+> Do **not** change default boot to Kiosk Menu from SCT **Boot title** unless you accept losing Home/FTP. Prefer `swap_coldboot_ftp.ps1` only after Home → SCT → Kiosk Menu already works. See [PROBLEMS — coldboot trap](../AI/PROBLEMS.md#stuck-in-kiosk-menu-coldboot).
 ---
 
 ## Test Setting
@@ -468,8 +465,6 @@ Browse titles on **MLC**, **USB**, and **SLC**.
 ---
 
 ## Crash Log Viewer
-
-(On-screen main-menu row may say **Crash Logs Viewer**.)
 
 - Crash Log #X >> (open that log)
 
@@ -534,3 +529,7 @@ Formats the system (as the name says). Destructive — use only if you mean it.
 ## Reboot System
 
 Reboots the console.
+
+# AI usage
+
+Cursor was used to check spelling and fix a few bugs. Mostly human documentation.

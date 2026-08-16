@@ -8,9 +8,8 @@ Conventions match the [SCT menu map](HowSystemConfigLooksLike.MD):
 |--------|---------|
 | `<…>` | Value you can change |
 | `>>` | Opens another screen — linked below |
-| Labels | Kept close to on-screen wording |
 
-Idle reboot / Region details: [PROBLEMS.md](../PROBLEMS.md). Launch path: [README — System Config Tool](../../README.md#system-config-tool).
+Idle reboot / Region details: [PROBLEMS.md](../AI/PROBLEMS.md). Launch path: [README — System Config Tool](../AI/README.md#system-config-tool).
 
 ---
 
@@ -60,7 +59,7 @@ Those counts update with **Region** and filter mode. They are not shown the same
 | Attract Mode | `<Normal / Switched / Movie on TV and GamePad>` | |
 | Game Filter | `<Demo + Retail / Demo Titles Only / Retail Title Only>` | |
 | Auto-Clear Save Data (Retail) | `<On / Off>` | |
-| No-Input Reset | `<On / Off>` | When **On**, idle can reboot other titles (~2 min); Kiosk Menu itself often stays up. Prefer **Off** — [PROBLEMS — Idle reboot](../PROBLEMS.md#idle-reboot-after-kiosk-menu--demos) |
+| No-Input Reset | `<On / Off>` | When **On**, idle can reboot other titles (~2 min); Kiosk Menu itself often stays up. Prefer **Off** — [PROBLEMS — Idle reboot](../AI/PROBLEMS.md#idle-reboot-after-kiosk-menu--demos) |
 | Create Test Boxes | `<On / Off>` | |
 | Exhibition Mode | `<On / Off>` | Shows only movies, not games. May say “No movies have been installed” without special titles |
 | Multi-Language Movies | `<On / Off>` | |
@@ -98,7 +97,7 @@ Shows **Remove the SD card** before continuing to the show / carousel path:
 
 ![Remove the SD card](Kiosk/Settings/readme/RemoveTheSDCard.jpg)
 
-On **redNAND** this is dangerous (licenses on the card) — **do not** pull the SD. Details: [PROBLEMS.md](../PROBLEMS.md#exit-kiosk-settings-remove-the-sd-card-rednand). On **sysNAND** after apply, removing the SD here is normal if you want that Exit flow.
+After a good sysNAND apply, removing the SD here is normal if you want that Exit flow. Details: [PROBLEMS.md](../AI/PROBLEMS.md#exit-kiosk-settings-remove-the-sd-card).
 
 ### No SD
 
@@ -115,7 +114,7 @@ Category pick and demo carousel (GamePad). Full-size originals: `Kiosk/Menu/`.
   <img src="Kiosk/Menu/readme/Mario3DWorldDemoDRC.jpg" alt="Kiosk Menu demo carousel" width="480" />
 </p>
 
-More shots (TV + GamePad + Settings): [PROBLEMS — Screenshots](../PROBLEMS.md#screenshots).
+More shots (TV + GamePad + Settings): [PROBLEMS — Screenshots](../AI/PROBLEMS.md#screenshots).
 
 ---
 
@@ -125,3 +124,7 @@ More shots (TV + GamePad + Settings): [PROBLEMS — Screenshots](../PROBLEMS.md#
   <img src="Kiosk/Settings/readme/KioskSettingsMain.jpg" alt="Kiosk Settings main list" width="480" />
   <img src="Kiosk/Settings/readme/KioskSettingsMenu.jpg" alt="Set Menu Options" width="480" />
 </p>
+
+# AI usage
+
+Cursor was used to check spelling and fix a few bugs. Mostly human documentation.

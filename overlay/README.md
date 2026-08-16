@@ -20,8 +20,8 @@ Gitignored until you build. This repo does not ship dumps, certs, or tickets.
 
 **`apply_mutant_slc_ftp.ps1`** always uploads certs, title.list, sys_prod, additive tickets, and **overwrites Kiosk Menu + native SCT `.tik`** (retail already has those paths). It then asks **Y/N** to upload `system.xml` (**default N** — could cause instability). Pass **`-ApplySystemXml`** to upload without the prompt. **`-FullKioskPolicy`** also uploads eco/prefs.
 
-If SCT/Kiosk Menu still say *Cannot launch this title* after an older apply, run `.\scripts\force_kiosk_launch_tickets_ftp.ps1` — see [PROBLEMS.md](../docs/PROBLEMS.md#cannot-launch-this-title-sct-or-kiosk-menu). Adding demos: [README](../README.md#adding-demos).
+If SCT/Kiosk Menu still say *Cannot launch this title* after an older apply, run `.\scripts\force_kiosk_launch_tickets_ftp.ps1` — see [PROBLEMS.md](../docs/AI/PROBLEMS.md#cannot-launch-this-title-sct-or-kiosk-menu). Adding demos: [NEWDEMOS.MD](../docs/AI/NEWDEMOS.MD).
 
 Scripts check required files exist before any FTP write and ask **Y/N** for every live SLC change.
 
-Next: follow [docs/REDNAND.md](../docs/REDNAND.md) or [docs/SYSNAND.md](../docs/SYSNAND.md).
+Next: follow [docs/AI/SYSNAND.md](../docs/AI/SYSNAND.md).
