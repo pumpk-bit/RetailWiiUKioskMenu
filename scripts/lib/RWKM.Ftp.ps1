@@ -422,3 +422,157 @@ Fix: run .\scripts\build_mutant_slc.ps1 first, or copy the variant from your kio
     ) -FailContext 'FTP verify system.xml'
     $verify | Select-String 'default_title_id'
 }
+
+# --- Recursive FTP tree helpers (FTPiiU NLST may return absolute paths) ---
+
+function Get-RwkmFtpListLeafName {
+    param(
+        [Parameter(Mandatory = $true)][string]$Entry,
+        [string]$RemoteDirUrl = ''
+    )
+    $n = $Entry.Trim().Trim('"').Trim("'")
+    if (-not $n -or $n -eq '.' -or $n -eq '..') { return $null }
+
+    $n = $n -replace '\\', '/'
+    if ($RemoteDirUrl) {
+        try {
+            $parentPath = ([Uri]($RemoteDirUrl.TrimEnd('/') + '/')).AbsolutePath.TrimEnd('/')
+            $parentPath = $parentPath -replace '\\', '/'
+            if ($parentPath -and $n.StartsWith($parentPath, [StringComparison]::OrdinalIgnoreCase)) {
+                $n = $n.Substring($parentPath.Length).TrimStart('/')
+            }
+        } catch { }
+    }
+    if ($n.StartsWith('/')) {
+        $n = ($n -split '/' | Where-Object { $_ })[-1]
+    } elseif ($n.Contains('/')) {
+        $n = ($n -split '/' | Where-Object { $_ })[-1]
+    }
+    if (-not $n -or $n -eq '.' -or $n -eq '..') { return $null }
+    return $n
+}
+
+function Get-RwkmFtpNameList {
+    param(
+        [Parameter(Mandatory = $true)][string]$RemoteDirUrl,
+        [Parameter(Mandatory = $true)][string]$Credential
+    )
+    $url = $RemoteDirUrl.TrimEnd('/') + '/'
+    $raw = Invoke-RwkmCurlFtp -CurlArgs @(
+        '-s', '--ftp-pasv', '--list-only',
+        $url, '--user', $Credential
+    ) -FailContext "FTP NLST $url"
+    if (-not $raw) { return @() }
+    $text = if ($raw -is [array]) { $raw -join "`n" } else { [string]$raw }
+    $out = New-Object System.Collections.Generic.List[string]
+    foreach ($line in ($text -split "`r?`n")) {
+        $leaf = Get-RwkmFtpListLeafName -Entry $line -RemoteDirUrl $url
+        if ($leaf) { [void]$out.Add($leaf) }
+    }
+    return ,@($out)
+}
+
+function Test-RwkmFtpRemoteDir {
+    param(
+        [Parameter(Mandatory = $true)][string]$RemoteDirUrl,
+        [Parameter(Mandatory = $true)][string]$Credential
+    )
+    try {
+        $null = Get-RwkmFtpNameList -RemoteDirUrl $RemoteDirUrl -Credential $Credential
+        return $true
+    } catch {
+        return $false
+    }
+}
+
+function Invoke-RwkmFtpDownloadTree {
+    param(
+        [Parameter(Mandatory = $true)][string]$RemoteDirUrl,
+        [Parameter(Mandatory = $true)][string]$LocalDir,
+        [Parameter(Mandatory = $true)][string]$Credential
+    )
+    New-Item -ItemType Directory -Force -Path $LocalDir | Out-Null
+    $names = Get-RwkmFtpNameList -RemoteDirUrl $RemoteDirUrl -Credential $Credential
+    $fileCount = 0
+    foreach ($name in $names) {
+        $remoteChild = ($RemoteDirUrl.TrimEnd('/') + '/' + $name)
+        $localChild = Join-Path $LocalDir $name
+        if (Test-RwkmFtpRemoteDir -RemoteDirUrl $remoteChild -Credential $Credential) {
+            $fileCount += Invoke-RwkmFtpDownloadTree -RemoteDirUrl $remoteChild -LocalDir $localChild -Credential $Credential
+        } else {
+            Write-RwkmLog "  GET $name"
+            Invoke-RwkmFtpGet -RemoteUrl $remoteChild -LocalPath $localChild -Credential $Credential
+            if (-not (Test-Path -LiteralPath $localChild)) {
+                throw "FTP download missing local file: $localChild"
+            }
+            $fileCount++
+        }
+    }
+    return $fileCount
+}
+
+function Get-RwkmFtpRelativeFiles {
+    param(
+        [Parameter(Mandatory = $true)][string]$RemoteDirUrl,
+        [Parameter(Mandatory = $true)][string]$Credential,
+        [string]$Prefix = ''
+    )
+    $list = New-Object System.Collections.Generic.List[string]
+    $names = Get-RwkmFtpNameList -RemoteDirUrl $RemoteDirUrl -Credential $Credential
+    foreach ($name in $names) {
+        $remoteChild = ($RemoteDirUrl.TrimEnd('/') + '/' + $name)
+        $rel = if ($Prefix) { "$Prefix/$name" } else { $name }
+        if (Test-RwkmFtpRemoteDir -RemoteDirUrl $remoteChild -Credential $Credential) {
+            $child = Get-RwkmFtpRelativeFiles -RemoteDirUrl $remoteChild -Credential $Credential -Prefix $rel
+            foreach ($c in $child) { [void]$list.Add($c) }
+        } else {
+            [void]$list.Add($rel.Replace('\', '/'))
+        }
+    }
+    return ,@($list)
+}
+
+function Invoke-RwkmFtpRmdir {
+    param(
+        [Parameter(Mandatory = $true)][string]$RemoteDirUrl,
+        [Parameter(Mandatory = $true)][string]$Credential
+    )
+    $uri = [Uri]($RemoteDirUrl.TrimEnd('/') + '/')
+    $path = $uri.AbsolutePath.TrimStart('/').TrimEnd('/')
+    $hostPort = "$($uri.Host)$(if ($uri.Port -ne -1 -and $uri.Port -ne 0) { ":$($uri.Port)" })"
+    $parts = @($path -split '/' | Where-Object { $_ -ne '' })
+    if ($parts.Count -lt 2) { return }
+    $mount = $parts[0]
+    $rmdRel = ($parts[1..($parts.Count - 1)] -join '/')
+    $mountUrl = "$($uri.Scheme)://${hostPort}/${mount}/"
+    try {
+        $null = Invoke-RwkmCurlFtp -CurlArgs @(
+            '-s', '--ftp-pasv', '--list-only',
+            $mountUrl, '--user', $Credential,
+            '-Q', "RMD $rmdRel"
+        ) -FailContext "FTP RMD $RemoteDirUrl"
+    } catch {
+        Write-RwkmLog "WARN: RMD failed for $rmdRel (may already be gone)"
+    }
+}
+
+function Invoke-RwkmFtpDeleteTree {
+    param(
+        [Parameter(Mandatory = $true)][string]$RemoteDirUrl,
+        [Parameter(Mandatory = $true)][string]$Credential
+    )
+    if (-not (Test-RwkmFtpRemoteDir -RemoteDirUrl $RemoteDirUrl -Credential $Credential)) {
+        return
+    }
+    $names = Get-RwkmFtpNameList -RemoteDirUrl $RemoteDirUrl -Credential $Credential
+    foreach ($name in $names) {
+        $remoteChild = ($RemoteDirUrl.TrimEnd('/') + '/' + $name)
+        if (Test-RwkmFtpRemoteDir -RemoteDirUrl $remoteChild -Credential $Credential) {
+            Invoke-RwkmFtpDeleteTree -RemoteDirUrl $remoteChild -Credential $Credential
+            Invoke-RwkmFtpRmdir -RemoteDirUrl $remoteChild -Credential $Credential
+        } else {
+            Write-RwkmLog "  DELE $name"
+            Invoke-RwkmFtpDelete -RemoteUrl $remoteChild -Credential $Credential
+        }
+    }
+}

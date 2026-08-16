@@ -1,6 +1,6 @@
 # Retail Wii U Kiosk Menu
 
-Run the **CAT-I Kiosk Menu** on a retail Wii U. This is **Kiosk Menu**, not a full kiosk OS — no custom Home Button Menu. You open it from **System Config Tool (SCT)** after merging kiosk licenses onto SLC and uploading the menu (and demos) to MLC.
+Run the **CAT-I Kiosk Menu** on a retail Wii U. This is **Kiosk Menu**, not a full kiosk OS. You open it from **System Config Tool (SCT)** after merging kiosk licenses onto SLC and uploading the menu (and demos) to MLC
 
 **No dumps or tickets** in this repo. You supply your own CAT-I extract.
 
@@ -22,8 +22,9 @@ Run the **CAT-I Kiosk Menu** on a retail Wii U. This is **Kiosk Menu**, not a fu
 |-------|----------------|
 | **[Human tutorial](docs/HUMAN/README.MD)** | Want step-by-step FTP / hex / PowerShell by hand. Made by me. |
 | **[AI / scripts tutorial](docs/AI/README.md)** | Prefer PowerShell scripts (`build_mutant_slc`, FTP apply, demos). Made with the help of Cursor AI. |
+| **[Experimental](docs/AI/EXPERIMENTAL.MD)** | Kiosk Home Button Menu / system fonts (high risk, incomplete). |
 
-Both paths need: **Aroma**, **FTPiiU**, **ISFShax + minute**, a **CAT-I dump**, and **SCT** (retail `13374454` on Home, or native `1f700500`).
+Both main paths need: **Aroma**, **FTPiiU**, **ISFShax + minute**, a **CAT-I dump**, and **SCT** (retail `13374454` on Home, or native `1f700500`).
 
 **Launch:** Home → System Config Tool → Title Launcher → **Kiosk Menu** (Type: Menu).
 

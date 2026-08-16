@@ -195,6 +195,9 @@ If a demo **hard-crashes from Home Menu too**, tickets / `title.list` / Region a
 
 ## Stuck in Kiosk Menu coldboot
 
+One way you can try to escape is with the internet browser. If you have a demo game installed, launch it and then press the "Home" button. You should be able to access the internet browser from there. Go to `wiiuexploit.xyz` , press the button and hold B. Then contine like usual. When you launch System Config Tool, change the defualt boot menu.
+
+
 Kiosk Menu as default boot means **Home never loads**, so **FTP plugins never start**. PC scripts cannot undo that.
 
 **Recovery:** **minute restore** from your offline SLC dump.

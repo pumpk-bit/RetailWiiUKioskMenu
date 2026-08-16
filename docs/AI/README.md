@@ -8,9 +8,9 @@ Read this page before starting, or skip it if you know what you are doing.
 
 ## Kiosk Menu, not "kiosk OS"
 
-It's likely that kiosks ran the **retail Wii U system**. **Kiosk Menu** is an app (`1fa81000`) opened from **SCT**, plus extra SLC tickets and demo titles on MLC. This project does **not** replace the OS with kiosk firmware. So you won't get the kiosk Home Button Menu.
+It's likely that kiosks ran the **retail Wii U system**. **Kiosk Menu** is an app (`1fa81000`) opened from **SCT**, plus extra SLC tickets and demo titles on MLC. This project does **not** replace the OS with kiosk firmware.
 
-Working titles: **Kiosk Menu**, **Some Kiosk Apps**, **native SCT**, launch tickets, and optional **demos**. Unless you know what you are doing and are willing to risk a full **MLC and SLC** erase/rebuild, **do not** try to port other kiosk system apps (Home Button Menu / `00050030` applets, error UI, browser builds, and similar). Same title ID as retail does **not** mean a drop-in swap — a bad replace can hard-brick with **160-0103** and leave FTP unreachable. This is probably because kiosk units ran on an older version of Cafe OS.
+Working titles: **Kiosk Menu**, **Some Kiosk Apps**, **native SCT**, launch tickets, and optional **demos**. Porting other kiosk system apps (HOME overlay, error UI, browser, …) is **not** part of the main guide — same title ID as retail is **not** a drop-in swap and can hard-brick with **160-0103**. An incomplete, high-risk HOME/fonts path lives under **[EXPERIMENTAL.MD](EXPERIMENTAL.MD)**.
 
 Keep **retail Home Menu** as default boot so FTP still works. See [Default boot](#default-boot-optional).
 
@@ -32,6 +32,7 @@ Some Aroma plugins **may** also work while Kiosk Menu is open (these shots were 
 | **Real hardware** (sysNAND) | **[SYSNAND.md](SYSNAND.md)** |
 | **Problems, bugs, undo** | **[PROBLEMS.md](PROBLEMS.md)** |
 | **Adding / removing demos** | **[NEWDEMOS.md](NEWDEMOS.MD)** |
+| **Experimental** (kiosk HOME / fonts) | **[EXPERIMENTAL.MD](EXPERIMENTAL.MD)** |
 | **Screenshots** (minute / SCT / kiosk) | **[PROBLEMS.md § Screenshots](PROBLEMS.md#screenshots)** · [SCT menu map](../PNG/HowSystemConfigLooksLike.MD) · [Kiosk Settings map](../PNG/HowKioskSettingsLookLike.MD) |
 
 Launch: **Home → System Config Tool (SCT) → Kiosk Menu**.
@@ -94,6 +95,7 @@ Option 3: Home never loads → **FTP never starts** → PC undo will not work. R
 | [`swap_coldboot_ftp.ps1`](../../scripts/swap_coldboot_ftp.ps1) | `-Mode home` / `sct` / `kioskmenu` |
 | [`restore_im_cfg_ftp.ps1`](../../scripts/restore_im_cfg_ftp.ps1) | Idle reboot fix |
 | [`set_sys_prod_region_ftp.ps1`](../../scripts/set_sys_prod_region_ftp.ps1) | Optional region spoof |
+| [`apply_kiosk_hbm_ftp.ps1`](../../scripts/apply_kiosk_hbm_ftp.ps1) / [`apply_kiosk_fonts_ftp.ps1`](../../scripts/apply_kiosk_fonts_ftp.ps1) | **Experimental** — [EXPERIMENTAL.MD](EXPERIMENTAL.MD) |
 
 Mutant output: `overlay\mutant\slc\` ([overlay/README.md](../../overlay/README.md)).
 

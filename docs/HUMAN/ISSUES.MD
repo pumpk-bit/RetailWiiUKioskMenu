@@ -49,6 +49,8 @@ If a demo crashes from Home Menu too, tickets / `title.list` / region are not th
 
 Kiosk Menu as default boot means Home never loads, so FTP plugins may never start.
 
+One way you can try to escape is with the internet browser. If you have a demo game installed, launch it and then press the "Home" button. You should be able to access the internet browser from there. Go to `wiiuexploit.xyz` , press the button and hold B. Then contine like usual. When you launch System Config Tool, change the defualt boot menu.
+
 You can use Minute restore to reflash the SLC.
 
 If you find a way out of the Kiosk Menu and into the Home Menu then go to System Config Tool and set the default boot or use FTP.  [HowSystemConfigLooksLike.MD](../PNG/HowSystemConfigLooksLike.MD)

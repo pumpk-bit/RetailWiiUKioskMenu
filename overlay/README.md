@@ -8,6 +8,12 @@ overlay/mutant/slc/
 
 Gitignored until you build. This repo does not ship dumps, certs, or tickets.
 
+| Path | Role |
+|------|------|
+| `overlay/mutant/slc/` | Mutant SLC rights (`build_mutant_slc.ps1`) |
+| `overlay/mutant/mlc/sys/title/00050030/<id>/` | Retail-compatible kiosk HBM (`build_kiosk_hbm_mlc.ps1`) — **lab / redNAND only** |
+| Live replace | `apply_kiosk_hbm_ftp.ps1` (FTP backup → patch → verify → upload → orphan delete → remote hash check) |
+
 | File | Change |
 |------|--------|
 | `cert.sys` | Retail + kiosk chains |
