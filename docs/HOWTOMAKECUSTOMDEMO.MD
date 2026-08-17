@@ -4,6 +4,8 @@ Rough guide: turn a **video-only** stub title into your own trailer tile in Kios
 
 You keep the stub’s **title ID + ticket**. You only replace the movie, text, and art.
 
+For swapping the **playable game** RPX (homebrew via **Play Demo**), see [HOWTOMAKECUSTOMGAMEDEMO.MD](HOWTOMAKECUSTOMGAMEDEMO.MD).
+
 ## Needed
 
 * [ffmpeg](https://ffmpeg.org/download.html) for video.
@@ -167,6 +169,11 @@ See:
 * Human: [ADDINGGAMES.MD](HUMAN/ADDINGGAMES.MD)  
 * Scripts: [NEWDEMOS.MD](AI/NEWDEMOS.MD)
 
+Example:
+
+![Custom demo layout on TV](PNG/Kiosk/menu/CustomTV.png)
+
+Game made by [siahisaforker](https://github.com/PortPak/sonic3air-plus).
 
 # AI usage
 
