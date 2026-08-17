@@ -173,7 +173,7 @@ See:
 
 Example:
 
-![Custom demo layout on TV](PNG/Kiosk/menu/CustomTV.png)
+![Custom demo layout on TV](PNG/Kiosk/Menu/CustomTV.png)
 
 Game made by [siahisaforker](https://github.com/PortPak/sonic3air-plus).
 
