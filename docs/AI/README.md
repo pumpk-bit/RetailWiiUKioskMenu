@@ -32,6 +32,8 @@ Some Aroma plugins **may** also work while Kiosk Menu is open (these shots were 
 | **Real hardware** (sysNAND) | **[SYSNAND.md](SYSNAND.md)** |
 | **Problems, bugs, undo** | **[PROBLEMS.md](PROBLEMS.md)** |
 | **Adding / removing demos** | **[NEWDEMOS.md](NEWDEMOS.MD)** |
+| **Kiosk system titles** (Featured, New, attract) | **[KIOSKTITLESDOC.MD](../KIOSKTITLESDOC.MD)** |
+| **Japan / NCL Kiosk Menu** | **[JPNKIOSKMENU.MD](JPNKIOSKMENU.MD)** |
 | **Experimental** (kiosk HOME / fonts) | **[EXPERIMENTAL.MD](EXPERIMENTAL.MD)** |
 | **Screenshots** (minute / SCT / kiosk) | **[PROBLEMS.md § Screenshots](PROBLEMS.md#screenshots)** · [SCT menu map](../PNG/HowSystemConfigLooksLike.MD) · [Kiosk Settings map](../PNG/HowKioskSettingsLookLike.MD) |
 

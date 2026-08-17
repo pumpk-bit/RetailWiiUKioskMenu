@@ -1,10 +1,12 @@
 # How to make a custom kiosk demo (video stub)
 
-Rough guide: turn a **video-only** stub title into your own trailer tile in Kiosk Menu.
+ Turn a **video-only** stub title into your own trailer tile in Kiosk Menu.
 
 You keep the stub’s **title ID + ticket**. You only replace the movie, text, and art.
 
 For swapping the **playable game** RPX (homebrew via **Play Demo**), see [HOWTOMAKECUSTOMGAMEDEMO.MD](HOWTOMAKECUSTOMGAMEDEMO.MD).
+
+[AI usage](#ai-usage).
 
 ## Needed
 

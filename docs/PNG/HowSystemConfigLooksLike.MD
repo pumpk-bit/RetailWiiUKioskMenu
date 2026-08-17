@@ -2,6 +2,9 @@
 
 How **System Config Tool** (SCT) looks on-screen. Use this when launching **Kiosk Menu**, or when hunting a setting.
 
+[AI usage](#ai-usage).
+
+
 **Retail / homebrew SCT on Home Menu** (`13374454` — normal Home icon):
 
 ![System Config Tool tile on Wii U Home Menu](RetailSystemConfigTool.png)
@@ -16,7 +19,7 @@ Native kiosk SCT (`1f700500`) does **not** appear as a Home tile. Open it via co
 | `[…]` | On-screen button / action (e.g. `[Erase]`, `[Reset to default]`) |
 | `>>` | Opens another screen — linked to that section |
 
-Header line (example):
+Header:
 
 ```text
 System Config Tool ver.X.XX.X		Sys X.X.X : WUP : OS [NAND]
@@ -36,10 +39,6 @@ System Config Tool ver.X.XX.X		Sys X.X.X : WUP : OS [NAND]
 
 ---
 
-## Main menu
-
-### Everyday settings
-
 - [Title Launcher >>](#title-launcher)
 - [Data Manager >>](#data-manager)
 - [Account Manager >>](#account-manager)
@@ -52,8 +51,6 @@ System Config Tool ver.X.XX.X		Sys X.X.X : WUP : OS [NAND]
 - [Eula >>](#eula)
 - [Other Setting >>](#other-setting) 
 
-### Diagnostics / info
-
 - [Boot Configuration >>](#boot-configuration)
 - [Test Setting >>](#test-setting) 
 - [System Titles Viewer >>](#system-titles-viewer)
@@ -62,8 +59,6 @@ System Config Tool ver.X.XX.X		Sys X.X.X : WUP : OS [NAND]
 - [Console Event Viewer >>](#console-event-viewer)
 - [System Hardware Information >>](#system-hardware-information)
 - [Software Version Information >>](#software-version-information)
-
-### System actions
 
 - [Update System >>](#update-system)
 - [Format System](#format-system)
@@ -108,7 +103,7 @@ Example row (Kiosk Menu):
 
 | Entry | Notes |
 |-------|--------|
-| Install >> | Installs content from USB |
+| Install >> | Installs content from SD |
 | Uninstall >> | Uninstalls content from the system |
 | Copy >> | Copies content within the system |
 | Move >> | Moves content within the system |
@@ -435,7 +430,7 @@ Sets the main menu title for the Wii U.
 | `<00050010_1f700500>` | System Config Tool |
 | `<00050010_10040200>` | Wii U Menu |
 
-> Do **not** change default boot to Kiosk Menu from SCT **Boot title** unless you accept losing Home/FTP. Prefer `swap_coldboot_ftp.ps1` only after Home → SCT → Kiosk Menu already works. See [PROBLEMS — coldboot trap](../AI/PROBLEMS.md#stuck-in-kiosk-menu-coldboot).
+> Do **not** change default boot to Kiosk Menu from SCT **Boot title** unless you accept losing Home/FTP.
 ---
 
 ## Test Setting

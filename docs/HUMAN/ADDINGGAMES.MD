@@ -2,6 +2,16 @@
 
 Here you'll learn how to add games to the kiosk menu, different region games also work.
 
+# What demos can I add? 
+
+This project only supports pre-extracted kiosk demos. MLC title folders plus the SLC ticket from a kiosk dump. (Can be a different dump form what you have. You need MLC and SLC. (OTP to decrypt))
+
+| Source | Works? |
+|--------|--------|
+| Pre-extracted demo from a kiosk SLC + MLC dump | Yes |
+| Interactive Disk / kiosk-style installable update (like on real kiosks) | No |
+
+
 ## What you need
 
 Every playable kiosk demo needs three pieces on the console:

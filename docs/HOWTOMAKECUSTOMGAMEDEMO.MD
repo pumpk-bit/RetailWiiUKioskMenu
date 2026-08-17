@@ -17,6 +17,8 @@ You **do not** replace `non_playable_demo.rpx` on the stub for this trick. That 
 
 **Requirements:** Aroma (or similar), an SD card if your homebrew loads assets from SD, and a **playable + stub pair** you are okay overwriting. Keep the same **title ID + ticket** — do not invent a new demo ID without a signed ticket.
 
+[AI usage](#ai-usage).
+
 ---
 
 ## Needed

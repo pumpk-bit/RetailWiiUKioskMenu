@@ -1,6 +1,19 @@
-# Adding and removing demos
+# What demos can I add?
+
+This project only supports **pre-extracted kiosk demos** - MLC title folders plus the matching **SLC ticket** and **`title.list`** entry from a kiosk dump.
+
+| Source | Works? |
+|--------|--------|
+| Pre-extracted demo from a **kiosk SLC + MLC dump** | Yes |
+| **Interactive Disk** / kiosk-style installable update (like on real kiosks) | No |
+
+Reskinning an existing extracted demo (custom trailer, homebrew RPX) is fine — you still keep the original title ID and ticket.
+
+
+## Adding and removing demos
 
 Hub: [README.md](README.md) · [SYSNAND.md](SYSNAND.md) · [PROBLEMS.md](PROBLEMS.md)
+
 
 Every playable kiosk demo needs three pieces on the console:
 

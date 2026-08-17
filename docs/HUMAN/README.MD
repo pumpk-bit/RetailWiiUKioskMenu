@@ -16,7 +16,6 @@ Want to remove it from the Wii U? [Here!](#removing)
 
 It's likely that Nintendo made the CAT-I like the retail unit and only added a few extra ports and software - this is why we can run the kiosk menu.
 
-We won't be adding all kiosk features in the main tutorial.A few experimental features are here (high risk): [EXPERIMENTAL.MD](../AI/EXPERIMENTAL.MD). (AI warning)
 
 
 Example photos from my retail Wii U taken with [Screenshot](https://hb-app.store/wiiu/Screenshot_WUPS). GamePad might seem too brightened but that's a bug and doesn't look like that in real life. 
