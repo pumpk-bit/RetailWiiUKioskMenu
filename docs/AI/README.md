@@ -97,7 +97,7 @@ Option 3: Home never loads → **FTP never starts** → PC undo will not work. R
 | [`swap_coldboot_ftp.ps1`](../../scripts/swap_coldboot_ftp.ps1) | `-Mode home` / `sct` / `kioskmenu` |
 | [`restore_im_cfg_ftp.ps1`](../../scripts/restore_im_cfg_ftp.ps1) | Idle reboot fix |
 | [`set_sys_prod_region_ftp.ps1`](../../scripts/set_sys_prod_region_ftp.ps1) | Optional region spoof |
-| [`apply_kiosk_hbm_ftp.ps1`](../../scripts/apply_kiosk_hbm_ftp.ps1) / [`apply_kiosk_fonts_ftp.ps1`](../../scripts/apply_kiosk_fonts_ftp.ps1) | **Experimental** — [EXPERIMENTAL.MD](EXPERIMENTAL.MD) |
+| [`apply_kiosk_hbm_ftp.ps1`](../../scripts/apply_kiosk_hbm_ftp.ps1) / [`apply_kiosk_fonts_ftp.ps1`](../../scripts/apply_kiosk_fonts_ftp.ps1) / [`apply_devmenu_ftp.ps1`](../../scripts/apply_devmenu_ftp.ps1) | **Experimental** — [EXPERIMENTAL.MD](EXPERIMENTAL.MD) |
 
 Mutant output: `overlay\mutant\slc\` ([overlay/README.md](../../overlay/README.md)).
 

@@ -4,6 +4,7 @@ How **System Config Tool** (SCT) looks on-screen. Use this when launching **Kios
 
 [AI usage](#ai-usage).
 
+[Keyboard](#keyboard-usage)
 
 **Retail / homebrew SCT on Home Menu** (`13374454` — normal Home icon):
 
@@ -524,6 +525,12 @@ Formats the system (as the name says). Destructive — use only if you mean it.
 ## Reboot System
 
 Reboots the console.
+
+# Keyboard usage
+
+Arrow keys to move.
+
+F12 for `Shell Mode`
 
 # AI usage
 

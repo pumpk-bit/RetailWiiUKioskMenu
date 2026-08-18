@@ -26,6 +26,7 @@ Do this only after the normal mutant + Kiosk Menu path already works.
 |---------|-------|-----------|--------|
 | **Kiosk Home Button Menu** | `00050030-1001020A` (PAL) / `1001010A` (USA) | [`apply_kiosk_hbm_ftp.ps1`](../../scripts/apply_kiosk_hbm_ftp.ps1), [`build_kiosk_hbm_mlc.ps1`](../../scripts/build_kiosk_hbm_mlc.ps1) | Works: kiosk jingle + kiosk HOME UI |
 | **System fonts** | `0005001B-10042400` | [`apply_kiosk_fonts_ftp.ps1`](../../scripts/apply_kiosk_fonts_ftp.ps1) | Apply works; **usually no visible change** (retail TTFs already match kiosk) |
+| **DevMenu** | `00050010-1F7001FF` | [`apply_devmenu_ftp.ps1`](../../scripts/apply_devmenu_ftp.ps1) | Works and launches. Useless since you cannot navigate it. |
 
 Helpers: [`RWKM.Hbm.ps1`](../../scripts/lib/RWKM.Hbm.ps1), FTP tree helpers in [`RWKM.Ftp.ps1`](../../scripts/lib/RWKM.Ftp.ps1).
 
@@ -87,6 +88,23 @@ On a typical retail console these files **already match** the kiosk dump — app
 Kiosk **Show** UI mainly uses MenuApp’s own fonts under `content/menuapp/fonts/`, not system `CafeStd`.
 
 Backup: `backup\fonts_ftp_<stamp>\`.
+
+---
+
+## DevMenu (`1f7001ff`)
+
+Factory **DevMenu** (`devmenu.rpx` / `sysmenuD`). Same MLC uploader as Kiosk Menu (`upload_sys_title_mlc.ps1`); this wrapper only changes **TitleIds** to `1f7001ff`.
+
+It will **not** appear on Home (`app_type` Menu). Ticket is packed inside kiosk `sys/rights/ticket/sys/0000/00000009.tik` (not its own file). The script **appends** that 848-byte ticket to the live file and adds the ID to `title.list` if missing. It does **not** overwrite `00000009.tik` wholesale (first ticket in that file is the USA version list).
+
+```powershell
+.\scripts\apply_devmenu_ftp.ps1 -Force
+.\scripts\apply_devmenu_ftp.ps1 -SourceRoot 'D:\Cat-I USA\Extracted\sys\title\00050010' -Force
+```
+
+Launch: reboot → **SCT → Title Launcher → System NAND (mlc)** → `<00050010_1f7001ff>` → **Title Type: Menu**.
+
+Do **not** coldboot this title (same FTP trap as Kiosk Menu). Backup: `backup\devmenu_ftp_<stamp>\`.
 
 ---
 

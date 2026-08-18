@@ -1,46 +1,62 @@
-# Documentation on kiosk software
+# Kiosk helper titles
 
-Mostly contains documentation on how and what some kiosk software does. Your dump may be missing some of these apps. You can upload the titles from another dump if wanted. Most of them are optional.
+These are the extra **system titles** (`00050000`) that Kiosk Menu uses alongside demo tiles (`00050002`). Your console may be missing some of them. Most are optional — you can copy missing titles from another kiosk install.
 
-[Anything corrupted?](#anything-corrupted)
+For Kiosk Menu itself (`1fa81000`), see [JPNKIOSKMENU.MD](AI/JPNKIOSKMENU.MD) (Japan/NCL profile) or the main setup guides.
 
-[Want new "new" titles?](#1fa82300)
+**On this page**
 
-[Want new "featured" titles?](#1fa82200)
+- [Title overview](#title-overview)
+- [Video helpers (About Wii U, Attract, Amiibo)](#video-helpers-about-wii-u-attract-amiibo)
+- [Featured list](#featured-list-1fa82200)
+- [New releases list](#new-releases-list-1fa82300)
+- [Broken or missing files](#broken-or-missing-files)
+- [How to encode video](#how-to-encode-video)
+- [How to recreate XML](#how-to-recreate-xml)
+- [AI usage](#ai-usage)
 
+---
 
-[AI usage](#ai-usage).
+## Title overview
 
+Full title IDs start with **`00050000`**, then the 8-character folder name (example: `1fa82200` → `000500001fa82200`).
 
-# Kiosk `00050000` titles
+On the Wii U, these titles live under:
 
+`mlc/usr/title/00050000/<8-char-id>/`
 
-This list documents **system titles** Kiosk Menu uses alongside demo tiles (`00050002`).
-
-Full title IDs use the prefix **`00050000`** (e.g. `1fa82200` → `000500001fa82200`). On MLC they live under:
-
-`storage_mlc/usr/title/00050000/<8-char-id>/`
-
-| ID | Meaning | What it does |
-|----|---------|--------------|
-| `1fa82000` | About Wii U | Bubble in Kiosk Menu with Wii U explainer videos (e.g. “What is the GamePad?”). Button top right. |
-| `1fa82100` | Attract Wii U | Idle/attract videos when Kiosk Menu is not in use. |
-| `1fa82200` | Featured | Controls which demos appear under **Featured** (bottom left). |
-| `1fa82300` | New releases | Controls which demos appear under **New** (bottom left). |
-| `1fa83300` | About Amiibo | Amiibo explainer videos. Shows a bubble on the top left.|
+| ID | Name | What it does |
+|----|------|--------------|
+| `1fa82000` | About Wii U | Top-right bubble with Wii U explainer videos (e.g. “What is the GamePad?”). |
+| `1fa82100` | Attract Mode | Idle/attract videos when Kiosk Menu is not in use. |
+| `1fa82200` | Featured | Controls which demos show under **Featured** (bottom left). |
+| `1fa82300` | New releases | Controls which demos show under **New** (bottom left). |
+| `1fa83300` | About Amiibo | Top-left bubble with Amiibo explainer videos. |
 | `1fa80000` | KioskMenuSetterDev | Switches the main boot title of the Wii U. |
 
-# 1fa82000 / 1fa82100 / 1fa83300
+---
 
-Contains video files: `AboutWiiU00-X`, `AttractMode00-X`, or `AboutAmiibo00-X`. Can be replaced — see [Anything corrupted?](#anything-corrupted).
+## Video helpers (About Wii U, Attract, Amiibo)
 
-# 1fa82200 
+Titles `1fa82000`, `1fa82100`, and `1fa83300` play MP4 files from their `meta/` folder.
 
-Contains special xml `Featured.xml`.
+| Title | Video file pattern |
+|-------|-------------------|
+| About Wii U | `AboutWiiU00.mp4` … `AboutWiiU05.mp4` |
+| Attract Mode | `AttractMode00.mp4` … `AttractMode11.mp4` |
+| About Amiibo | `AboutAmiibo00.mp4` |
 
-Inside it looks like this:
+You can replace broken videos — see [Broken or missing files](#broken-or-missing-files) and [How to encode video](#how-to-encode-video).
 
-```
+---
+
+## Featured list (`1fa82200`)
+
+Kiosk Menu reads **`meta/Featured.xml`** from this title.
+
+Example file:
+
+```xml
 <?xml version="1.0" encoding="utf-8"?>
 <title_list type="featured">
 	<title order="1" start_date="2012-01-01 00:00:00" end_date="2035-01-01 23:59:59">00050002101DB4FF</title>
@@ -49,29 +65,36 @@ Inside it looks like this:
 </title_list>
 ```
 
-You can list any kiosk demo tile here. Entries use the **full** `00050002` title ID (often the **stub** `…FF` folder — the tile Kiosk Menu shows).
+Each entry is a **full 16-hex demo title ID** (`00050002` + 8-char folder ID). Use the **stub** ID (`…FF`) when that is the tile Kiosk Menu shows.
 
-How to add one:
+### Add a demo to Featured
 
-Take the demo you want in **Featured**. Combine root + folder ID. Example: New Super Mario Bros. U — `00050002` + `10117e00` = `0005000210117e00` (use the stub ID if your tile is `10117eff` or similar).
+1. Pick the demo you want listed.
+2. Build the full ID: `00050002` + folder name.  
+   Example: New Super Mario Bros. U folder `10117e00` → `0005000210117e00` (or `…10117eff` if your tile is the stub).
+3. Add a line to `Featured.xml`:
 
-Add a line to the XML:
-
-```
+```xml
 <title order="3" start_date="2012-01-01 00:00:00" end_date="2035-01-01 23:59:59">0005000210117e00</title>
 ```
 
-`start_date="2012-01-01 00:00:00"` — when the entry becomes active (date + time)  
-`end_date="2035-01-01 23:59:59"` — when it stops showing (date + time)
+| Attribute | Meaning |
+|-----------|---------|
+| `order` | Sort position (lower numbers first). |
+| `start_date` | When the entry becomes active (date + time). |
+| `end_date` | When it stops showing (date + time). |
 
+4. Upload the changed file, reboot or re-open Kiosk Menu, and check **Featured**.
 
-# 1fa82300 
+---
 
-Contains special xml `NewReleases.xml` 
+## New releases list (`1fa82300`)
 
-Inside it looks like this: 
+Same idea as Featured, but Kiosk Menu reads **`meta/NewReleases.xml`**.
 
-```
+Example file:
+
+```xml
 <?xml version="1.0" encoding="utf-8"?>
 <title_list type="new release">
 	<title order="1" start_date="2012-01-01 00:00:00" end_date="2035-01-01 23:59:59">00050002101DB4FF</title>
@@ -80,36 +103,38 @@ Inside it looks like this:
 </title_list>
 ```
 
-Same idea as Featured — use full `00050002` title IDs.
+### Add a demo to New
 
-How to add one:
+1. Build the full demo ID the same way as Featured.
+2. Add a line to `NewReleases.xml`:
 
-Take the demo you want under **New**. Example: New Super Mario Bros. U — `00050002` + `10117e00` = `0005000210117e00`.
-
-```
+```xml
 <title order="3" start_date="2012-01-01 00:00:00" end_date="2035-01-01 23:59:59">0005000210117e00</title>
 ```
 
-`start_date` / `end_date` — same as Featured above.
+3. Upload, reboot or re-open Kiosk Menu, and check **New**.
 
-## Anything corrupted?
+`start_date` / `end_date` work the same as on Featured.
 
-**Video files** — replacements can be found online. Re-encode if they don’t match what the Wii U expects (see [How to encode video](#how-to-encode-video) below).
+---
 
-**bootDrcTex.tga / bootLogotex.tga / bootTvTex.tga / iconTex.tga / bootMovie.h264 / Manual.bfma** — copy from another kiosk app if missing; these apps don’t always need every asset.
+## Broken or missing files
 
-**.rpx / title.fst / title.tmd** — no recovery guide here.
+**Video files** — replacements can be found online. Re-encode if the Wii U rejects them ([How to encode video](#how-to-encode-video)).
 
-**.xml** — you can try to recreate it (templates below).
+**Boot art / manual** (`bootDrcTex.tga`, `bootLogotex.tga`, `bootTvTex.tga`, `iconTex.tga`, `bootMovie.h264`, `Manual.bfma`) — copy from another kiosk helper title if missing. Not every title needs every asset.
 
+**`.rpx` / `title.fst` / `title.tmd`** — no recovery guide here.
 
-# How to encode video
+**`.xml`** — you can try to recreate them ([How to recreate XML](#how-to-recreate-xml)).
 
-[ffmpeg](https://ffmpeg.org/download.html) for video.
+---
 
-Same recipe as demo trailers in [HOWTOMAKECUSTOMDEMO.MD](HOWTOMAKECUSTOMDEMO.MD).
+## How to encode video
 
-Encode like Nintendo’s kiosk trailers: **1080p H.264 High@L4.0 + AAC stereo 48 kHz** (not Opus).
+Use [ffmpeg](https://ffmpeg.org/download.html).
+
+Same recipe as demo trailers in [HOWTOMAKECUSTOMDEMO.MD](HOWTOMAKECUSTOMDEMO.MD): **1080p H.264 High@L4.0 + AAC stereo 48 kHz** (not Opus).
 
 ```powershell
 ffmpeg -y -i "YourSource.mp4" `
@@ -121,50 +146,49 @@ ffmpeg -y -i "YourSource.mp4" `
   -c:a aac -b:a 192k -ac 2 -ar 48000 `
   -movflags +faststart `
   -brand mp42 `
-  "OutPut.mp4"
+  "Output.mp4"
 ```
 
-Put the result at `OutPut.mp4` (overwrite the old one but keep a backup, unless the backup is 0-bytes).
+Replace the output filename with the MP4 your title expects (e.g. `AboutWiiU00.mp4`). Keep a backup of the old file unless it is empty (0 bytes).
 
+---
 
-# How to recreate a `.xml`
+## How to recreate XML
 
-Use this when `app.xml`, `cos.xml`, or `meta.xml` under a kiosk **`00050000`** title is missing or corrupted. It does **not** cover demo stub text — that is `KioskMeta.xml` on **`00050002`** titles ([HOWTOMAKECUSTOMDEMO.MD](HOWTOMAKECUSTOMDEMO.MD)).
+Use this when `app.xml`, `cos.xml`, or `meta.xml` under a kiosk **`00050000`** title is missing or corrupted.
 
-The templates below are **fictional examples**, same element names and hierarchy as real Cafe title XML, but not copied from any retail or kiosk file. If your dump as at least one good copy then use that as a guide.
+This does **not** cover demo stub text — that is `KioskMeta.xml` on **`00050002`** titles ([HOWTOMAKECUSTOMDEMO.MD](HOWTOMAKECUSTOMDEMO.MD)).
 
-### Where files live
+The templates below are **fictional examples**. They use the same element names as real Cafe title XML, but values are placeholders. If you have a working copy of the same title, prefer that over guessing.
 
-Console path:
+### Folder layout
 
-`storage_mlc/usr/title/00050000/<8-char-id>/`
-
-Example layout (fictional folder ID `12345678`):
-
-```
-12345678/
+```text
+<8-char-id>/
   code/
     app.xml
     cos.xml
-    example_app.rpx         ← filename must match cos.xml argstr
-    title.tmd               ← not recreatable here
-    title.fst                 ← not recreatable here
+    example_app.rpx    ← filename must match cos.xml argstr
+    title.tmd          ← not recreatable here
+    title.fst          ← not recreatable here
   meta/
     meta.xml
+    Featured.xml       ← Featured title only
+    NewReleases.xml    ← New releases title only
   content/
 ```
 
 | File | Role |
 |------|------|
-| `code/app.xml` | Title identity: **`title_id`**, OS/SDK version |
-| `code/cos.xml` | Launch config: **`argstr`** = RPX filename; FS permissions |
-| `meta/meta.xml` | Display names, product code, publisher — Wii U title metadata |
-| `meta/Featured.xml` | Featured demo list (plain XML, not Cafe `app.xml`) |
+| `code/app.xml` | Title identity: `title_id`, OS/SDK version |
+| `code/cos.xml` | Launch config: `argstr` = RPX filename; FS permissions |
+| `meta/meta.xml` | Display names, product code, publisher |
+| `meta/Featured.xml` | Featured demo list (plain XML) |
 | `meta/NewReleases.xml` | New-release demo list (plain XML) |
 
 ### `title_id` format
 
-Use **16 hex characters**, no `0x` prefix: **`00050000`** (system title type) + your **8-character folder ID**.
+16 hex characters, no `0x` prefix: **`00050000`** + your **8-character folder ID**.
 
 | Folder (example) | Value in `app.xml` / `meta.xml` |
 |------------------|----------------------------------|
@@ -175,21 +199,21 @@ The same **`title_id`** must appear in **`app.xml`** and **`meta.xml`**. A misma
 
 ### RPX name (`cos.xml` → `argstr`)
 
-**`argstr`** must match the **exact** `.rpx` filename in `code/` (case-sensitive), e.g. `example_app.rpx`.
+**`argstr`** must match the exact `.rpx` filename in `code/` (case-sensitive), e.g. `example_app.rpx`.
 
-If you recreate `cos.xml` but the matching `.rpx`, `title.tmd`, or `title.fst` is still broken then XML alone is not enough.
+If `cos.xml` is fixed but the matching `.rpx`, `title.tmd`, or `title.fst` is still broken, XML alone is not enough.
 
 ### After editing
 
-1. Upload changed files to `storage_mlc/usr/title/00050000/<id>/` (8-char folder name only).
+1. Upload changed files into the title folder on MLC (8-char folder name only).
 2. Reboot the console.
 3. Re-open Kiosk Menu and verify the affected feature.
 
 ---
 
-### Wii U `app.xml` template (example)
+### `app.xml` template (example)
 
-Replace placeholder values with those from **your** title folder. **`group_id`**, **`sdk_version`**, and **`os_version`** should match a working dump of the same title when possible.
+Replace placeholders with values from your title. **`group_id`**, **`sdk_version`**, and **`os_version`** should match a working install of the same title when possible.
 
 ```xml
 <!--
@@ -213,15 +237,15 @@ Replace placeholder values with those from **your** title folder. **`group_id`**
 |-------|---------|
 | `title_id` | Full 16-hex system title ID |
 | `title_version` | 4-hex title version |
-| `sdk_version` | SDK build number from your dump |
-| `group_id` | Title group — copy from a donor file when unsure |
+| `sdk_version` | SDK build number from a working copy |
+| `group_id` | Title group — copy from a working file when unsure |
 | `os_version` | Minimum OS version the title expects |
 
 ---
 
-### Wii U `cos.xml` template (example)
+### `cos.xml` template (example)
 
-Set **`argstr`** to your RPX filename. The **permissions** block defines FS/USB/account access; the masks below are a generic starting layout — prefer a donor `cos.xml` from the same title type if launch fails.
+Set **`argstr`** to your RPX filename. The **permissions** block defines FS/USB/account access. The masks below are a generic starting layout — prefer a working `cos.xml` from the same title type if launch fails.
 
 ```xml
 <!--
@@ -330,9 +354,9 @@ Set **`argstr`** to your RPX filename. The **permissions** block defines FS/USB/
 
 ---
 
-### Wii U `meta.xml` template (example)
+### `meta.xml` template (example)
 
-Human-readable **`longname_*`**, **`shortname_*`**, and **`publisher_*`** fields control how the title reads on Home. Kiosk helper titles are often invisible there, but keep them consistent. **`product_code`** and **`company_code`** are metadata strings — use values from your donor title when recreating a real install.
+**`longname_*`**, **`shortname_*`**, and **`publisher_*`** control how the title reads on Home. Kiosk helper titles are often invisible there, but keep them consistent. **`product_code`** and **`company_code`** are metadata strings — copy from a working install when recreating a real title.
 
 ```xml
 <!--
@@ -493,12 +517,10 @@ Human-readable **`longname_*`**, **`shortname_*`**, and **`publisher_*`** fields
 
 ### `Featured.xml` / `NewReleases.xml`
 
-Plain list files in `meta/` — not Cafe `app.xml` / `meta.xml`. See [#1fa82200](#1fa82200) and [#1fa82300](#1fa82300) above for structure. List entries use full **`00050002`** demo IDs from **your** install (fictional example: `0005000212345678`).
+Plain list files in `meta/` — not Cafe `app.xml` / `meta.xml`. See [Featured list](#featured-list-1fa82200) and [New releases list](#new-releases-list-1fa82300). Each entry uses a full **`00050002`** demo ID from your install.
 
-# AI usage
+---
 
-Cursor was used to check spelling and fix a few in my text bugs. Mostly human documentation on what app does what and works how.
+## AI usage
 
-Cursor helped understand and recreate the right `.mp4` with ffmpeg since the Wii U won't accept modern versions.
-
-Cursor also helped explain `.xml` for new users.
+Cursor was used for spelling fixes and to clarify a few awkward sentences. It also helped document the ffmpeg settings the Wii U accepts for kiosk MP4s, and the XML templates above for readers new to Cafe title files.
