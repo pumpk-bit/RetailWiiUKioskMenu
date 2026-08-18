@@ -2,12 +2,12 @@
 
 These are the extra **system titles** (`00050000`) that Kiosk Menu uses alongside demo tiles (`00050002`). Your console may be missing some of them. Most are optional — you can copy missing titles from another kiosk install.
 
-For Kiosk Menu itself (`1fa81000`), see [JPNKIOSKMENU.MD](AI/JPNKIOSKMENU.MD) (Japan/NCL profile) or the main setup guides.
+Want any of these missing titles? See [here](https://github.com/pumpk-bit/Wii-U-Kiosk-Homebrew) for homebrew replacements.
 
 **On this page**
 
 - [Title overview](#title-overview)
-- [Video helpers (About Wii U, Attract, Amiibo)](#video-helpers-about-wii-u-attract-amiibo)
+- [Video helpers (About Wii U, Attract, Amiibo, Exhibition)](#video-helpers-about-wii-u-attract-amiibo-exhibition)
 - [Featured list](#featured-list-1fa82200)
 - [New releases list](#new-releases-list-1fa82300)
 - [Broken or missing files](#broken-or-missing-files)
@@ -32,21 +32,25 @@ On the Wii U, these titles live under:
 | `1fa82200` | Featured | Controls which demos show under **Featured** (bottom left). |
 | `1fa82300` | New releases | Controls which demos show under **New** (bottom left). |
 | `1fa83300` | About Amiibo | Top-left bubble with Amiibo explainer videos. |
+| `1fa82700` | Exhibition Mode | Forces full-screen TV + GamePad movie loop (`TVnn.mp4` / `DRCnn.mp4` in `meta/`). Optional. |
 | `1fa80000` | KioskMenuSetterDev | Switches the main boot title of the Wii U. |
 
 ---
 
-## Video helpers (About Wii U, Attract, Amiibo)
+## Video helpers (About Wii U, Attract, Amiibo, Exhibition)
 
-Titles `1fa82000`, `1fa82100`, and `1fa83300` play MP4 files from their `meta/` folder.
+Titles `1fa82000`, `1fa82700`, `1fa82100`, and `1fa83300` play MP4 files from their `meta/` folder.
 
 | Title | Video file pattern |
 |-------|-------------------|
 | About Wii U | `AboutWiiU00.mp4` … `AboutWiiU05.mp4` |
 | Attract Mode | `AttractMode00.mp4` … `AttractMode11.mp4` |
 | About Amiibo | `AboutAmiibo00.mp4` |
+| Exhibition Mode | `TV00.mp4` / `DRC00.mp4` ... `TV99.mp4` / `DRC99.mp4` |
 
 You can replace broken videos — see [Broken or missing files](#broken-or-missing-files) and [How to encode video](#how-to-encode-video).
+
+Exhibition Mode needs custom [videos](#exhibition-video).
 
 ---
 
@@ -150,6 +154,37 @@ ffmpeg -y -i "YourSource.mp4" `
 ```
 
 Replace the output filename with the MP4 your title expects (e.g. `AboutWiiU00.mp4`). Keep a backup of the old file unless it is empty (0 bytes).
+
+## Exhibition Video
+
+Use [ffmpeg](https://ffmpeg.org/download.html).
+
+Same as before but GamePad has 480p.
+
+**TV clip:**
+
+```powershell
+ffmpeg -y -i "Source.mp4" `
+  -map 0:v:0 -map 0:a:0? `
+  -c:v libx264 -profile:v high -level 4.0 -pix_fmt yuv420p `
+  -vf "scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2" `
+  -r 30 -c:a aac -b:a 192k -ac 2 -ar 48000 `
+  -movflags +faststart -brand mp42 `
+  "tv_clip.mp4"
+```
+
+**GamePad clip:**
+
+```powershell
+ffmpeg -y -i "Source.mp4" `
+  -map 0:v:0 -map 0:a:0? `
+  -c:v libx264 -profile:v high -level 4.0 -pix_fmt yuv420p `
+  -vf "scale=854:480:force_original_aspect_ratio=decrease,pad=854:480:(ow-iw)/2:(oh-ih)/2" `
+  -r 30 -c:a aac -b:a 192k -ac 2 -ar 48000 `
+  -movflags +faststart -brand mp42 `
+  "pad_clip.mp4"
+```
+
 
 ---
 

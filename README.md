@@ -57,6 +57,13 @@ Both main paths need: **Aroma**, **FTPiiU**, **ISFShax + minute**, a **CAT-I dum
 | **[AI / scripts debugging](docs/AI/PROBLEMS.md)** | Find mistakes. Made with the help of Cursor AI. |
 
 
+## Missing titles
+
+If you want kiosk titles that didn't came with your dump or were corrupted, here are homebrew replacements: [link](https://github.com/pumpk-bit/Wii-U-Kiosk-Homebrew).
+
+These are not kiosk demos, only helper apps. See here for more info: [Kiosk system titles](docs/KIOSKTITLESDOC.MD).
+
+
 ## Legal
 
 Kiosk NAND/title/SCT data is copyrighted. Obtain dumps yourself.
