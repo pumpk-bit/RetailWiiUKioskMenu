@@ -57,12 +57,12 @@ Those counts update with **Region** and filter mode. They are not shown the same
 | Setting | Options | Notes |
 |---------|---------|--------|
 | Operating Mode | `<Multi-Controller / Wii U GamePad Only / Video Only>` | Use **Wii U GamePad Only** if you do not want the “No controllers connected” warning in Kiosk Show mode |
-| Attract Mode | `<Normal / Switched / Movie on TV and GamePad>` | |
-| Game Filter | `<Demo + Retail / Demo Titles Only / Retail Title Only>` | |
+| Attract Mode | `<Normal / Switched / Movie on TV and GamePad>` | When idle. Needs the Attract app installed. Normal = TV shows video, Switched = GamePad shows video. |
+| Game Filter | `<Demo + Retail / Demo Titles Only / Retail Title Only>` | Does not show retail games that are installed. |
 | Auto-Clear Save Data (Retail) | `<On / Off>` | |
 | No-Input Reset | `<On / Off>` | When **On**, idle can reboot other titles (~2 min); Kiosk Menu itself often stays up. Prefer **Off**|
-| Create Test Boxes | `<On / Off>` | |
-| Exhibition Mode | `<On / Off>` | Shows only movies, not games. May say “No movies have been installed” without special titles |
+| Create Test Boxes | `<On / Off>` | Kiosk debug settings. Needs titles to be valid and not have kiosk meta. You can ignore it. |
+| Exhibition Mode | `<On / Off>` | Shows only movies, not games. May say “No movies have been installed” without title isntalled. See more in kiosk titles|
 | Multi-Language Movies | `<On / Off>` | |
 | CERO Rating Confirmation | `<On / Off>` | |
 
