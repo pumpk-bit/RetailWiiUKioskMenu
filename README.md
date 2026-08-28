@@ -48,7 +48,7 @@ Both main paths need: **Aroma**, **FTPiiU**, **ISFShax + minute**, a **CAT-I dum
 | Adding all kinds of demos | Notes |
 |-------|----------------|
 | **[Human tutorial](docs/HUMAN/ADDINGGAMES.MD)** | Step-by-step FTP / hex / PowerShell guide by hand. Made by me. |
-| **[AI / scripts tutorial](docs/AI/NEWDEMOS.md)** | PowerShell scripts and easier. Made with the help of Cursor AI. |
+| **[AI / scripts tutorial](docs/AI/NEWDEMOS.MD)** | PowerShell scripts and easier. Made with the help of Cursor AI. |
 
 
 | Any problems? | Notes |
