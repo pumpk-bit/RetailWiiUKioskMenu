@@ -23,7 +23,7 @@ You open the Kiosk Menu from **System Config Tool (SCT)** after merging kiosk li
 | Install | Notes |
 |-------|----------------|
 | **[Human tutorial](docs/HUMAN/README.MD)** | Step-by-step FTP / hex / PowerShell by hand. Made by me. |
-| **[AI / scripts tutorial](docs/AI/README.MD)** | PowerShell scripts (`build_mutant_slc`, FTP apply, demos). Made with the help of Cursor AI. |
+| **[AI / scripts tutorial](docs/AI/README.md)** | PowerShell scripts (`build_mutant_slc`, FTP apply, demos). Made with the help of Cursor AI. |
 
 Both main paths need: **Aroma**, **FTPiiU**, **ISFShax + minute**, a **CAT-I dump**, and **SCT**. More about it in the tutorials.
 
